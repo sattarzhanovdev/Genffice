@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Genffice</title>
     <style>
+      @media print {
+        body { background: #fff; }
+        .topbar, .ribbon, .sidebar, .footer { display: none !important; }
+        .wrap { display: block; padding: 0; }
+        .page { width: 210mm; margin: 0 auto; border: 0; box-shadow: none; }
+        .editor { min-height: auto; padding: 20mm; }
+      }
       :root {
         --blue: #0a73ff;
         --blue-dark: #0659c7;
@@ -225,6 +232,11 @@
           <button class="btn" onclick="deleteDoc()">🗑 Удалить</button>
         </div>
 
+        <div class="group">
+          <button class="btn" onclick="exportPDF()">⬇️ PDF</button>
+          <button class="btn" onclick="exportDOCX()">⬇️ DOCX</button>
+        </div>
+
         <div class="spacer"></div>
         <div class="group" style="border-right:none">
           <span class="muted">Документы</span>
@@ -271,6 +283,12 @@
       <!-- <div class="footer">Backend: http://127.0.0.1:8000/api</div> -->
     </div>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- PDF (html2pdf.js = html2canvas + jsPDF в одном бандле) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-YcsIPM4u8c7FkuQv2rCqgN0o0o8qG5LhJ6Hq6oGJ3neRr8mQ9u1H9J5v0J6etZlZyI1b1q3E7C2bJ3T1iG7QxA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <!-- DOCX -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" integrity="sha512-5hS5n8f3XzJq8N9aA9Y4y+eK6J8Y3bO3fCw5rX2S7xwS3n7xjYd8m1vNfO4WZ4R8qz+vQ7oZqUQd7C5iYd1Z4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-docx-js/0.3.1/html-docx.js" integrity="sha512-1m8G3NYy0Q6v8l0T1h7u7y4mJ+uQ3W6dVQh6r7c4f4p8pQ3o0q2q5uH3pQfQ2tH5Q3V6yq0r5d3lqv0r0Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <script>
       const BASE = `${window.location.origin}/api`;
@@ -608,6 +626,71 @@
         $("aiPreview").innerHTML = "";
         $("aiReason").textContent = "";
       }
+
+      // Получаем имя файла из поля названия документа
+  function getDocName(ext) {
+    const name = (document.getElementById('docName')?.value || 'document')
+      .trim()
+      .replace(/[\\/:*?"<>|]+/g, '_')
+    return name || ('document.' + ext);
+  }
+
+  // ===== Экспорт в PDF (html2pdf.js) =====
+  async function exportPDF() {
+    const page = document.querySelector('.page'); // печатаем ровно «лист»
+    if (!page) return;
+
+    const filename = getDocName('pdf');
+
+    const opt = {
+      margin:       [10, 10, 10, 10],      // мм
+      filename,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    // Чтобы таблицы и длинные строки не ломали вёрстку
+    page.style.wordBreak = 'break-word';
+    page.style.overflowWrap = 'anywhere';
+
+    await html2pdf().set(opt).from(page).save();
+  }
+
+  // ===== Экспорт в DOCX (html-docx-js) =====
+  function exportDOCX() {
+    const page = document.querySelector('.page');
+    if (!page) return;
+
+    const filename = getDocName('docx');
+
+    // Минимальная типографика, которая поедет в Word
+    const docxCss = `
+      body { font-family: Arial, sans-serif; font-size: 12pt; color: #111; }
+      h1 { font-size: 24pt; margin: 0 0 10pt; }
+      h2 { font-size: 18pt; margin: 12pt 0 6pt; }
+      h3 { font-size: 14pt; margin: 10pt 0 6pt; }
+      p  { margin: 6pt 0; }
+      ul, ol { margin: 6pt 0 6pt 18pt; }
+      table { border-collapse: collapse; width: 100%; }
+      th, td { border: 1px solid #ddd; padding: 6pt; vertical-align: top; }
+      code, pre { font-family: Consolas, 'Courier New', monospace; }
+    `;
+
+    const html =
+      '<!DOCTYPE html><html><head><meta charset="utf-8"><style>' +
+      docxCss +
+      '</style></head><body>' +
+      page.innerHTML +
+      '</body></html>';
+
+    // поля: 720 twips = 0.5" = ~12.7 мм
+    const blob = window.htmlDocx.asBlob(html, {
+      orientation: 'portrait',
+      margins: { top: 720, right: 720, bottom: 720, left: 720 }
+    });
+    saveAs(blob, filename);
+  }
     </script>
   </body>
 </html>
