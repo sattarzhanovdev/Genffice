@@ -100,6 +100,77 @@
       .editor a { color:#0a73ff; text-decoration:underline; }
       .editor table { border-collapse:collapse; width:100%; margin:10px 0; }
       .editor th, .editor td { border:1px solid #e6e8ef; padding:6px 8px; text-align:left; vertical-align:top; }
+
+      /* Центрируем форму по экрану */
+.login-wrap {
+  max-width: 360px;
+  margin: 10vh auto;
+  padding: 32px 28px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.1);
+  text-align: center;
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+.login-wrap h2 {
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: 600;
+  color: #111826;
+}
+
+/* Поля ввода */
+.login-wrap .input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d4d8e3;
+  border-radius: 10px;
+  font-size: 14px;
+  margin-bottom: 14px;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.login-wrap .input:focus {
+  border-color: #0a73ff;
+  box-shadow: 0 0 0 2px rgba(10,115,255,0.2);
+  outline: none;
+}
+
+/* Кнопка */
+.login-wrap .btn {
+  width: 100%;
+  padding: 12px;
+  background: #0a73ff;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.login-wrap .btn:hover {
+  background: #0659c7;
+}
+
+.login-wrap .btn:active {
+  background: #044aad;
+}
+
+/* Ошибки */
+.login-wrap .error {
+  margin-top: 10px;
+  color: #e54848;
+  font-size: 13px;
+}
+
+/* Анимация */
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(-10px);}
+  to {opacity: 1; transform: translateY(0);}
+}
     </style>
   </head>
   <body>
@@ -107,10 +178,10 @@
     <div id="login" class="login-wrap card">
       <h2 style="margin:0 0 10px">Вход в Mini Docs</h2>
       <div class="field">
-        <label>Логин</label><input id="username" class="input" placeholder="username" />
+        <input id="username" class="input" placeholder="username" />
       </div>
       <div class="field">
-        <label>Пароль</label><input id="password" type="password" class="input" placeholder="password"/>
+        <input id="password" type="password" class="input" placeholder="password"/>
       </div>
       <div class="row">
         <button class="btn" onclick="login()">Войти</button>
