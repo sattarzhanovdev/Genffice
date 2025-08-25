@@ -243,17 +243,17 @@
         <!-- AI side -->
         <div class="card sidebar">
           <div class="side-head">
-            <strong>ONE AI</strong>
-            <span class="pill">β</span>
+            <strong>GEN AI</strong>
+            <span class="pill">В будущее вместе с нами!</span>
             <span class="muted" style="margin-left:auto">/api/ai</span>
           </div>
           <div class="side-body">
             <textarea id="prompt" class="text" placeholder="Например: «Сделай техническое задание без компаний и бюджетов, только требования и критерии приёмки»"></textarea>
             <div class="row">
               <button class="btn" onclick="runAI()">Ответ</button>
-              <button class="btn" onclick="runAIStream()">Стрим</button>
-              <button class="btn" onclick="insertAIToDoc()">Вставить в документ</button>
-              <button class="btn" onclick="runAIHtml()">Сгенерировать → вставить</button>
+              <!-- <button class="btn" onclick="runAIStream()">Стрим</button> -->
+              <button class="btn" onclick="insertAIToDoc()">Вставить</button>
+              <!-- <button class="btn" onclick="runAIHtml()">Сгенерировать → вставить</button> -->
             </div>
             <div class="muted">Результат (Markdown):</div>
             <div id="aiOutput" class="out"></div>
