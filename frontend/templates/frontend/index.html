@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mini Docs — Ribbon UI</title>
+    <style>
+      :root {
+        --blue: #0a73ff;
+        --blue-dark: #0659c7;
+        --bg: #f6f7fb;
+        --panel: #ffffff;
+        --border: #e6e8ef;
+        --text: #111826;
+        --muted: #657089;
+        --icon: #3b465c;
+        --shadow: 0 6px 24px rgba(16, 24, 40, 0.08);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Inter, system-ui, Segoe UI, Roboto, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+      /* Top brand bar */
+      .topbar {
+        height: 54px; background: var(--blue); color:#fff;
+        display:flex; align-items:center; gap:12px; padding:0 16px; box-shadow:var(--shadow);
+      }
+      .brand { font-weight:700; letter-spacing:.2px; }
+      .docname {
+        margin-left:auto; background:rgba(255,255,255,.15);
+        border:1px solid rgba(255,255,255,.25); color:#fff; border-radius:8px;
+        padding:6px 10px; min-width:180px;
+      }
+      .user { display:flex; align-items:center; gap:8px; }
+      .user .dot { width:10px; height:10px; border-radius:50%; background:#7df18a; }
+
+      /* Ribbon */
+      .ribbon {
+        background:#fff; border-bottom:1px solid var(--border);
+        display:flex; align-items:center; gap:10px; padding:8px 12px;
+        position:sticky; top:0; z-index:20;
+      }
+      .group { display:flex; align-items:center; gap:6px; padding:6px 10px; border-right:1px solid var(--border); }
+      .btn{
+        display:inline-flex; align-items:center; justify-content:center; gap:6px;
+        height:34px; padding:0 10px; border:1px solid var(--border); border-radius:8px;
+        background:#fff; color:var(--icon); cursor:pointer; user-select:none; transition:.12s;
+        box-shadow:0 1px 0 rgba(0,0,0,.02);
+      }
+      .btn:hover{ background:#f4f6fb; }
+      .btn:active{ transform:translateY(1px); }
+      .btn.tog.active{ background:#ecf3ff; border-color:#cfe2ff; color:#0a53c1; }
+      .select{ height:34px; border:1px solid var(--border); border-radius:8px; padding:0 10px; background:#fff; }
+      .spacer{ flex:1; }
+
+      /* Layout */
+      .wrap{
+        display:grid; grid-template-columns:auto 360px; gap:16px; padding:16px; max-width:1400px; margin:0 auto;
+      }
+      .card{ background:var(--panel); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); }
+      .editor-scroll{ overflow:auto; }
+      .page{
+        width:840px; margin:24px auto; background:#fff; border:1px solid var(--border);
+        border-radius:12px; box-shadow:var(--shadow);
+      }
+      .editor{
+        min-height:1000px; padding:24px; outline:none; line-height:1.6; color:var(--text);
+        word-wrap:break-word; overflow-wrap:anywhere; white-space:normal;
+      }
+      .editor:focus{ box-shadow: inset 0 0 0 2px #e6f0ff; }
+      .sidebar{ display:flex; flex-direction:column; min-height:70vh; }
+      .side-head{ padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
+      .side-body{ padding:12px; display:flex; flex-direction:column; gap:10px; }
+
+      textarea,input,select{ font:inherit; }
+      .text{ width:100%; min-height:90px; border:1px solid var(--border); border-radius:10px; padding:10px; resize:vertical; }
+      .out{
+        display: none;
+        white-space:pre-wrap; border:1px dashed #cfd6e6; border-radius:10px; padding:10px; background:#fbfcff;
+        word-wrap:break-word; overflow-wrap:break-word; max-width:100%; box-sizing:border-box;
+      }
+      .row{ display:flex; gap:8px; align-items:center; }
+      .pill{ font-size:12px; color:#fff; background:var(--blue); padding:2px 8px; border-radius:999px; }
+      .muted{ color:var(--muted); font-size:12px; display: none;}
+      .list{ padding:10px; border-top:1px solid var(--border); max-height:200px; overflow:auto; }
+      .list .item{ padding:8px 10px; border-radius:8px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+      .list .item:hover{ background:#f6f7fb; }
+
+      /* типографика документа */
+      .editor h1{ font-size:28px; line-height:1.25; margin:0 0 12px; }
+      .editor h2{ font-size:22px; line-height:1.3;  margin:18px 0 8px; }
+      .editor h3{ font-size:18px; line-height:1.35; margin:14px 0 6px; }
+      .editor p { font-size:15px; margin:8px 0; }
+      .editor ul, .editor ol { padding-left:24px; margin:8px 0; }
+      .editor li { margin:4px 0; }
+      .editor hr { border:0; border-top:1px solid #e6e8ef; margin:16px 0; }
+      .editor a { color:#0a73ff; text-decoration:underline; }
+      .editor table { border-collapse:collapse; width:100%; margin:10px 0; }
+      .editor th, .editor td { border:1px solid #e6e8ef; padding:6px 8px; text-align:left; vertical-align:top; }
+    </style>
+  </head>
+  <body>
+    <!-- LOGIN -->
+    <div id="login" class="login-wrap card">
+      <h2 style="margin:0 0 10px">Вход в Mini Docs</h2>
+      <div class="field">
+        <label>Логин</label><input id="username" class="input" placeholder="username" />
+      </div>
+      <div class="field">
+        <label>Пароль</label><input id="password" type="password" class="input" placeholder="password"/>
+      </div>
+      <div class="row">
+        <button class="btn" onclick="login()">Войти</button>
+        <div id="loginError" class="error"></div>
+      </div>
+    </div>
+
+    <!-- APP -->
+    <div id="app" style="display:none">
+      <div class="topbar">
+        <div class="brand">Mini Docs</div>
+        <div class="spacer"></div>
+        <input id="docName" class="docname" placeholder="Без названия" />
+        <div class="user"><span class="dot"></span><span id="who" class="muted"></span></div>
+      </div>
+
+      <!-- Ribbon -->
+      <div class="ribbon">
+        <div class="group">
+          <select id="block" class="select" onchange="applyBlock(this.value)">
+            <option value="P">Абзац</option>
+            <option value="H1">Заголовок 1</option>
+            <option value="H2">Заголовок 2</option>
+            <option value="H3">Заголовок 3</option>
+            <option value="PRE">Код</option>
+          </select>
+          <button class="btn tog" id="bBold" onclick="cmd('bold',this)">B</button>
+          <button class="btn tog" id="bIt"   onclick="cmd('italic',this)"><i>I</i></button>
+          <button class="btn tog" id="bUn"   onclick="cmd('underline',this)"><u>U</u></button>
+        </div>
+
+        <div class="group">
+          <button class="btn" onclick="cmd('insertUnorderedList')">• Список</button>
+          <button class="btn" onclick="cmd('insertOrderedList')">1. Список</button>
+          <button class="btn" onclick="makeLink()">Ссылка</button>
+        </div>
+
+        <div class="group">
+          <button class="btn" onclick="saveDoc()">💾 Сохранить</button>
+          <button class="btn" onclick="newDoc()">➕ Новый</button>
+          <button class="btn" onclick="deleteDoc()">🗑 Удалить</button>
+        </div>
+
+        <div class="spacer"></div>
+        <div class="group" style="border-right:none">
+          <span class="muted">Документы</span>
+        </div>
+      </div>
+
+      <!-- Main layout -->
+      <div class="wrap">
+        <!-- Editor -->
+        <div class="card editor-scroll">
+          <div class="page">
+            <div id="editor" class="editor" contenteditable="true"></div>
+          </div>
+        </div>
+
+        <!-- AI side -->
+        <div class="card sidebar">
+          <div class="side-head">
+            <strong>ONE AI</strong>
+            <span class="pill">β</span>
+            <span class="muted" style="margin-left:auto">/api/ai</span>
+          </div>
+          <div class="side-body">
+            <textarea id="prompt" class="text" placeholder="Например: «Сделай техническое задание без компаний и бюджетов, только требования и критерии приёмки»"></textarea>
+            <div class="row">
+              <button class="btn" onclick="runAI()">Ответ</button>
+              <button class="btn" onclick="runAIStream()">Стрим</button>
+              <button class="btn" onclick="insertAIToDoc()">Вставить в документ</button>
+              <button class="btn" onclick="runAIHtml()">Сгенерировать → вставить</button>
+            </div>
+            <div class="muted">Результат (Markdown):</div>
+            <div id="aiOutput" class="out"></div>
+            <div class="muted">Предпросмотр (Markdown → HTML):</div>
+            <div id="aiPreview" class="out"></div>
+            <div class="muted">Обоснование:</div>
+            <div id="aiReason" class="out"></div>
+            <div class="row"><button class="btn" onclick="clearAI()">Очистить</button></div>
+            <div class="muted">Мои документы</div>
+            <div id="docsList" class="list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- <div class="footer">Backend: http://127.0.0.1:8000/api</div> -->
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <script>
+      const BASE = `${window.location.origin}/api`;
+      let token = null;
+      let currentDoc = null;
+
+      // ====== Утилиты ======
+      const $ = (id)=>document.getElementById(id);
+
+      function pickContent(data){
+        const obj = Array.isArray(data) ? data[0] : data;
+        return obj?.choices?.[0]?.message?.content || obj?.text || "";
+      }
+
+      function insertHTMLAtCursor(html){
+        const ed = $("editor");
+        ed.focus();
+        const sel = window.getSelection();
+        if(sel && sel.rangeCount){
+          let range = sel.getRangeAt(0);
+          range.deleteContents();
+          const el = document.createElement("div");
+          el.innerHTML = html;
+          const frag = document.createDocumentFragment();
+          let node,last;
+          while((node = el.firstChild)){ last = frag.appendChild(node); }
+          range.insertNode(frag);
+          if(last){
+            range = range.cloneRange();
+            range.setStartAfter(last);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
+        }else{
+          ed.innerHTML += html;
+        }
+      }
+
+      // ===== Markdown → HTML (без библиотек) =====
+      
+      function mdToHtml(md){
+        md = escapeHtml(md || "").replace(/\r\n?/g, '\n');
+        // ```code``` блоки
+        let codeBlocks = [];
+        md = md.replace(/```([\s\S]*?)```/g, (_,code)=>{
+          const idx = codeBlocks.push(`<pre><code>${code}</code></pre>`) - 1;
+          return `\u0000CODE${idx}\u0000`;
+        });
+
+        const lines = md.split('\n');
+        let html = '';
+        let inUl=false, inOl=false, inTable=false;
+        let tableHeader=null;
+
+        const closeLists = ()=>{ if(inUl){html+='</ul>';inUl=false;} if(inOl){html+='</ol>';inOl=false;} };
+        const closeTable = ()=>{ if(inTable){html+='</tbody></table>';inTable=false;tableHeader=null;} };
+
+        for(let i=0;i<lines.length;i++){
+          let line = lines[i];
+
+          // --- hr ---
+          if(/^\s*---+\s*$/.test(line)){ closeLists(); closeTable(); html+='<hr/>'; continue; }
+
+          // --- table ---
+          if(line.trim().startsWith('|') && line.trim().endsWith('|')){
+            const next = lines[i+1] || '';
+            if(!inTable){
+              html += '<table><thead>';
+              tableHeader = line;
+              if(/^\s*\|?\s*:?-{3,}\s*(\|\s*:?-{3,}\s*)+\|?\s*$/.test(next)){
+                const ths = tableHeader.slice(1,-1).split('|').map(s=>s.trim());
+                html += '<tr>'+ths.map(h=>`<th>${mdInline(h)}</th>`).join('')+'</tr></thead><tbody>';
+                inTable=true; i++; continue;
+              }
+            }
+            if(inTable){
+              const tds = line.slice(1,-1).split('|').map(s=>s.trim());
+              html += '<tr>'+tds.map(td=>`<td>${mdInline(td).replace(/\n/g,'<br>')}</td>`).join('')+'</tr>';
+              continue;
+            }
+          } else { closeTable(); }
+
+          // --- headings ---
+          const m = line.match(/^(#{1,6})\s+(.*)$/);
+          if(m){
+            closeLists();
+            const lvl = m[1].length, text = mdInline(m[2]);
+            html += `<h${lvl}>${text}</h${lvl}>`;
+            continue;
+          }
+
+          // --- ordered list ---
+          if(/^\s*\d+[\.\)]\s+/.test(line)){
+            if(!inOl){ closeLists(); html+='<ol>'; inOl=true; }
+            html += `<li>${mdInline(line.replace(/^\s*\d+[\.\)]\s+/,''))}</li>`;
+            continue;
+          } else if(inOl && line.trim()===''){ closeLists(); continue; }
+
+          // --- unordered list ---
+          if(/^\s*[-*]\s+/.test(line)){
+            if(!inUl){ closeLists(); html+='<ul>'; inUl=true; }
+            html += `<li>${mdInline(line.replace(/^\s*[-*]\s+/,''))}</li>`;
+            continue;
+          } else if(inUl && line.trim()===''){ closeLists(); continue; }
+
+          // --- empty ---
+          if(line.trim()===''){ closeLists(); html+=''; continue; }
+
+          // --- paragraph ---
+          closeLists();
+          html += `<p>${mdInline(line)}</p>`;
+        }
+
+        closeLists(); closeTable();
+
+        // вернуть code-блоки
+        html = html.replace(/\u0000CODE(\d+)\u0000/g, (_,i)=>codeBlocks[Number(i)]);
+        return html;
+      }
+
+      // ====== Аутентификация ======
+      async function login(){
+        const u = $("username").value.trim();
+        const p = $("password").value;
+        try{
+          const r = await fetch(BASE + "/auth/token/", {
+            method:"POST", headers:{ "Content-Type":"application/json" },
+            body: JSON.stringify({ username:u, password:p })
+          });
+          if(!r.ok) throw new Error("Неверный логин/пароль");
+          const d = await r.json();
+          token = d.access;
+
+          $("login").style.display = "none";
+          $("app").style.display   = "block";
+          $("who") && ($("who").textContent = u);
+
+          await loadDocs();
+          const has = document.querySelectorAll("#docsList .item").length > 0;
+          if(!has) await newDoc();
+        }catch(e){ $("loginError").textContent = e.message; }
+      }
+
+      function insertAIAsHTML() {
+        const text = document.getElementById("aiOutput").textContent.trim();
+        if (!text) return;
+
+        // превращаем markdown → html
+        const html = marked.parse(text);
+
+        // вставляем прямо в документ
+        insertHTMLAtCursor(html);
+      }
+
+      // ====== Документы ======
+      async function loadDocs(){
+        const r = await fetch(BASE + "/documents/", { headers:{ Authorization:"Bearer "+token }});
+        const docs = await r.json();
+        const list = $("docsList"); if(!list) return;
+        list.innerHTML = "";
+        docs.forEach(doc=>{
+          const div = document.createElement("div");
+          div.className = "item";
+          div.textContent = doc.title;
+          div.onclick = ()=>openDoc(doc);
+          list.appendChild(div);
+        });
+      }
+      function openDoc(doc){
+        currentDoc = doc;
+        $("docName").value = doc.title || "Без названия";
+        $("editor").innerHTML = doc.content_html || "";
+      }
+      async function newDoc(){
+        const r = await fetch(BASE + "/documents/", {
+          method:"POST",
+          headers:{ Authorization:"Bearer "+token, "Content-Type":"application/json" },
+          body: JSON.stringify({ title:"Без названия", content_html:"" })
+        });
+        const doc = await r.json();
+        openDoc(doc); loadDocs();
+      }
+      async function saveDoc(){
+        if(!currentDoc) return;
+        const title = $("docName").value || "Без названия";
+        const html  = $("editor").innerHTML;
+        const r = await fetch(`${BASE}/documents/${currentDoc.id}/`, {
+          method:"PATCH",
+          headers:{ Authorization:"Bearer "+token, "Content-Type":"application/json" },
+          body: JSON.stringify({ title, content_html: html })
+        });
+        const doc = await r.json();
+        openDoc(doc); loadDocs();
+      }
+      async function deleteDoc(){
+        if(!currentDoc) return;
+        if(!confirm("Удалить документ?")) return;
+        await fetch(`${BASE}/documents/${currentDoc.id}/`, {
+          method:"DELETE", headers:{ Authorization:"Bearer "+token }
+        });
+        currentDoc=null; $("docName").value=""; $("editor").innerHTML=""; loadDocs();
+      }
+
+      // ====== Команды редактора ======
+      function cmd(name, btn){ document.execCommand(name,false,null); if(btn) btn.classList.toggle("active"); $("editor").focus(); }
+      function applyBlock(tag){
+        const val = tag==="P"?"<p>": tag==="PRE"?"<pre>": `<${tag.toLowerCase()}>`;
+        document.execCommand("formatBlock", false, val); $("editor").focus();
+      }
+      function makeLink(){ const url=prompt("Вставьте URL:","https://"); if(!url)return; document.execCommand("createLink", false, url); $("editor").focus(); }
+
+      // ====== AI: обычный запрос (Markdown) ======
+      async function runAI() {
+    const prompt = document.getElementById("prompt").value.trim();
+    const content = document.getElementById("editor").innerHTML;
+    const out = document.getElementById("aiOutput");
+    const prev = document.getElementById("aiPreview");
+
+    out.textContent = "…";
+    if (prev) prev.innerHTML = "";
+
+    const resp = await fetch(BASE + "/ai/", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ mode: "generate", prompt, html: content })
+    });
+
+    const data = await resp.json();
+    const text = pickContent(data);
+
+    // ✅ вот здесь превращаем markdown → html
+    const html = marked.parse(text || "");
+
+    // сразу вставляем в документ
+    insertHTMLAtCursor(html);
+
+    out.textContent = text || "⚠️ Нет ответа"; // как «сырой текст»
+    if (prev) prev.innerHTML = html;           // как красиво отрендеренный HTML
+    
+  }
+
+      // ====== AI: «сгенерировать → вставить» (одиночный запрос) ======
+      async function runAIHtml(){
+        const prompt = $("prompt").value.trim();
+        const content = $("editor").innerHTML;
+        const out = $("aiOutput");
+        const prev = $("aiPreview");
+        out.textContent = "…"; if(prev) prev.innerHTML = "";
+
+        try{
+          const resp = await fetch(BASE + "/ai/", {
+            method:"POST",
+            headers:{ Authorization:"Bearer "+token, "Content-Type":"application/json" },
+            body: JSON.stringify({ mode:"generate", prompt, html: content })
+          });
+          if(!resp.ok){ out.textContent = "Ошибка: " + resp.status + " " + (await resp.text()); return; }
+          const data = await resp.json();
+          const md = pickContent(data);
+          out.textContent = md || "⚠️ Нет ответа";
+          const html = mdToHtml(md || "");
+          if(prev) prev.innerHTML = html;
+          if(html) insertHTMLAtCursor(html);
+        }catch(err){
+          out.textContent = "⚠️ Ошибка: " + err.message;
+        }
+      }
+
+      // ====== AI: стрим (если используешь) ======
+      async function runAIStream(){
+        const prompt = $("prompt").value.trim();
+        const content = $("editor").innerHTML;
+        const out = $("aiOutput");
+        const think = $("aiReason");
+        const prev = $("aiPreview");
+
+        out.textContent = ""; if(think) think.textContent = ""; if(prev) prev.innerHTML = "";
+
+        const resp = await fetch(BASE + "/ai/stream/", {
+          method:"POST",
+          headers:{ Authorization:"Bearer "+token, "Content-Type":"application/json" },
+          body: JSON.stringify({ mode:"generate", prompt, html: content })
+        });
+        if(!resp.ok){ out.textContent = "Ошибка: " + resp.status + " " + (await resp.text()); return; }
+
+        const reader = resp.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        while(true){
+          const { value, done } = await reader.read();
+          if(done) break;
+          buffer += decoder.decode(value, { stream:true });
+
+          let idx;
+          while((idx = buffer.indexOf("\n")) >= 0){
+            const raw = buffer.slice(0, idx); buffer = buffer.slice(idx+1);
+            const line = raw.trim(); if(!line || !line.startsWith("data:")) continue;
+            const data = line.slice(5).trim();
+            if(data === "[DONE]") return;
+
+            try{
+              const j = JSON.parse(data);
+              const ch = j?.choices?.[0] || {};
+              const d  = ch.delta || {};
+              if(typeof d.reasoning_content === "string" && d.reasoning_content && think) think.textContent += d.reasoning_content;
+              if(typeof d.content === "string" && d.content){
+                out.textContent += d.content;
+                if(prev) prev.innerHTML = mdToHtml(out.textContent);
+              }
+              const msg = ch?.message?.content;
+              if(typeof msg === "string" && msg){
+                out.textContent += msg;
+                if(prev) prev.innerHTML = mdToHtml(out.textContent);
+              }
+            }catch{
+              out.textContent += data;
+              if(prev) prev.innerHTML = mdToHtml(out.textContent);
+            }
+          }
+        }
+      }
+
+      // ====== Вставки из AI ======
+      function insertAIToDoc(){
+        const md = $("aiOutput").textContent.trim();
+        if(!md) return;
+        insertHTMLAtCursor( mdToHtml(md) );
+      }
+      function clearAI(){
+        $("aiOutput").textContent = "";
+        $("aiPreview").innerHTML = "";
+        $("aiReason").textContent = "";
+      }
+    </script>
+  </body>
+</html>
