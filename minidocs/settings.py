@@ -74,3 +74,6 @@ AI_PROVIDER_URL = os.getenv(
     "AI_PROVIDER_URL",
     "https://isadani.app.n8n.cloud/webhook/3fef88a0-8eae-4c40-bf3e-9737f2f44684",
 )
+
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
