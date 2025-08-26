@@ -27,9 +27,14 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-CORS_ALLOW_ORIGINS = ["https://genffice.pythonanywhere.com"]
-ALLOWED_HOSTS = ["https://genffice.pythonanywhere.com", "genffice.pythonanywhere.com"]
-CSRF_TRUSTED_ORIGINS = ["https://genffice.pythonanywhere.com"]
+# CORS_ALLOW_ORIGINS = ["https://genffice.pythonanywhere.com"]
+# ALLOWED_HOSTS = ["https://genffice.pythonanywhere.com", "genffice.pythonanywhere.com"]
+# CSRF_TRUSTED_ORIGINS = ["https://genffice.pythonanywhere.com"]
+
+CORS_ALLOW_ALL_ORIGINS = True
+ALLOWED_HOSTS = ["*"]
+CSRF_TRUSTED_ORIGINS = ["https://localhost", "http://127.0.0.1"]
+
 
 # DRF только с JWT, без SessionAuthentication → CSRF не нужен
 REST_FRAMEWORK = {
