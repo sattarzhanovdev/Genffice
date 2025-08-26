@@ -12,45 +12,41 @@
         .page { width: 210mm; margin: 0 auto; border: 0; box-shadow: none; }
         .editor { min-height: auto; padding: 20mm; }
       }
-      :root {
-        --blue: #0a73ff;
-        --blue-dark: #0659c7;
-        --bg: #f6f7fb;
-        --panel: #ffffff;
-        --border: #e6e8ef;
-        --text: #111826;
-        --muted: #657089;
-        --icon: #3b465c;
-        --shadow: 0 6px 24px rgba(16, 24, 40, 0.08);
+
+      :root{
+        --blue:#0a73ff; --blue-dark:#0659c7; --bg:#f6f7fb; --panel:#fff;
+        --border:#e6e8ef; --text:#111826; --muted:#657089; --icon:#3b465c;
+        --shadow:0 6px 24px rgba(16,24,40,.08);
       }
-      * { box-sizing: border-box; }
-      body {
-        margin: 0;
+      *{ box-sizing: border-box; }
+      body{
+        margin:0;
         font-family: Inter, system-ui, Segoe UI, Roboto, Arial, sans-serif;
         background: var(--bg);
         color: var(--text);
       }
+
       /* Top brand bar */
-      .topbar {
-        height: 54px; background: var(--blue); color:#fff;
+      .topbar{
+        height:54px; background:var(--blue); color:#fff;
         display:flex; align-items:center; gap:12px; padding:0 16px; box-shadow:var(--shadow);
       }
-      .brand { font-weight:700; letter-spacing:.2px; }
-      .docname {
+      .brand{ font-weight:700; letter-spacing:.2px; }
+      .docname{
         margin-left:auto; background:rgba(255,255,255,.15);
         border:1px solid rgba(255,255,255,.25); color:#fff; border-radius:8px;
         padding:6px 10px; min-width:180px;
       }
-      .user { display:flex; align-items:center; gap:8px; }
-      .user .dot { width:10px; height:10px; border-radius:50%; background:#7df18a; }
+      .user{ display:flex; align-items:center; gap:8px; }
+      .user .dot{ width:10px; height:10px; border-radius:50%; background:#7df18a; }
 
       /* Ribbon */
-      .ribbon {
+      .ribbon{
         background:#fff; border-bottom:1px solid var(--border);
         display:flex; align-items:center; gap:10px; padding:8px 12px;
         position:sticky; top:0; z-index:20;
       }
-      .group { display:flex; align-items:center; gap:6px; padding:6px 10px; border-right:1px solid var(--border); }
+      .group{ display:flex; align-items:center; gap:6px; padding:6px 10px; border-right:1px solid var(--border); }
       .btn{
         display:inline-flex; align-items:center; justify-content:center; gap:6px;
         height:34px; padding:0 10px; border:1px solid var(--border); border-radius:8px;
@@ -69,15 +65,76 @@
       }
       .card{ background:var(--panel); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); }
       .editor-scroll{ overflow:auto; }
+
+      /* Внешний лист (для «живого» редактора) */
       .page{
-        width:840px; margin:24px auto; background:#fff; border:1px solid var(--border);
-        border-radius:12px; box-shadow:var(--shadow);
+        width: 210mm; /* A4 */
+        margin: 24px auto;
+        background:#fff;
+        border:1px solid var(--border);
+        border-radius:12px;
+        box-shadow:var(--shadow);
+        box-sizing: border-box;
       }
+
+      /* Контент редактора + визуальные «границы страниц» каждые 297мм */
       .editor{
-        min-height:1000px; padding:24px; outline:none; line-height:1.6; color:var(--text);
-        word-wrap:break-word; overflow-wrap:anywhere; white-space:normal;
+        min-height: 297mm;            /* визуально минимум 1 страница */
+        padding: 20mm;                /* поля страницы */
+        outline:none;
+        line-height:1.6;
+        color:var(--text);
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        white-space: normal;
+
+        /* Линия-делитель на каждые 297мм (учитывает padding) */
+        background-image:
+          repeating-linear-gradient(
+            to bottom,
+            transparent 0,
+            transparent calc(297mm - 1px),
+            #e6e8ef calc(297mm - 1px),
+            #e6e8ef 297mm
+          );
+        background-size: 100% 297mm;
+        background-origin: content-box;
       }
+
+      /* Вставной разрыв страницы */
+      .page-break{
+        display:block; height:0; margin:14px 0; border:0; position:relative;
+      }
+      .page-break::before{
+        content:"— Разрыв страницы —";
+        display:block; text-align:center; color:#9aa3b2;
+        border-top:1px dashed #d7dbe6; margin:8px 0;
+      }
+
+      /* ПРЕВЬЮ: стопка «бумажных» страниц */
+      .pages{
+        display:grid; gap:16px; padding:16px; place-items:center;
+      }
+      .pages .page{
+        width:210mm; height:297mm; background:#fff;
+        border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow);
+        overflow:hidden;
+      }
+      .pages .page-body{
+        box-sizing:border-box; padding:20mm; width:100%; height:100%; overflow:hidden;
+        line-height:1.6; color:var(--text); word-break:break-word; overflow-wrap:anywhere; white-space:normal;
+      }
+      .pages .page-body table{ border-collapse:collapse; width:100%; table-layout:fixed; }
+      .pages .page-body th, .pages .page-body td{ border:1px solid #e6e8ef; padding:6px 8px; vertical-align:top; word-break:break-word; }
+
+      @media print{
+        #editor{ display:none !important; }
+        #pagesPreview{ display:block !important; }
+        .pages .page{ page-break-after:always; break-after:page; box-shadow:none; border:0; }
+      }
+
       .editor:focus{ box-shadow: inset 0 0 0 2px #e6f0ff; }
+
       .sidebar{ display:flex; flex-direction:column; min-height:70vh; }
       .side-head{ padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
       .side-body{ padding:12px; display:flex; flex-direction:column; gap:10px; }
@@ -85,18 +142,20 @@
       textarea,input,select{ font:inherit; }
       .text{ width:100%; min-height:90px; border:1px solid var(--border); border-radius:10px; padding:10px; resize:vertical; }
       .out{
-        display: none;
-        white-space:pre-wrap; border:1px dashed #cfd6e6; border-radius:10px; padding:10px; background:#fbfcff;
+        display:none; white-space:pre-wrap; border:1px dashed #cfd6e6; border-radius:10px; padding:10px; background:#fbfcff;
         word-wrap:break-word; overflow-wrap:break-word; max-width:100%; box-sizing:border-box;
       }
       .row{ display:flex; gap:8px; align-items:center; }
       .pill{ font-size:12px; color:#fff; background:var(--blue); padding:2px 8px; border-radius:999px; }
-      .muted{ color:var(--muted); font-size:12px; display: none;}
+      .muted{ color:var(--muted); font-size:12px; display:none; }
       .list{ padding:10px; border-top:1px solid var(--border); max-height:200px; overflow:auto; }
-      .list .item{ padding:8px 10px; border-radius:8px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-      .list .item:hover{ background:#f6f7fb; }
+      .list .item{
+        display:block; padding:8px 10px; border-radius:8px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+        text-decoration:none; color:inherit;
+      }
+      .list .item:hover{ background:#f6f7fb; text-decoration:none; }
 
-      /* типографика документа */
+      /* Типографика документа */
       .editor h1{ font-size:28px; line-height:1.25; margin:0 0 12px; }
       .editor h2{ font-size:22px; line-height:1.3;  margin:18px 0 8px; }
       .editor h3{ font-size:18px; line-height:1.35; margin:14px 0 6px; }
@@ -105,91 +164,54 @@
       .editor li { margin:4px 0; }
       .editor hr { border:0; border-top:1px solid #e6e8ef; margin:16px 0; }
       .editor a { color:#0a73ff; text-decoration:underline; }
-      .editor table { border-collapse:collapse; width:100%; margin:10px 0; }
-      .editor th, .editor td { border:1px solid #e6e8ef; padding:6px 8px; text-align:left; vertical-align:top; }
+      .editor table { border-collapse:collapse; width:100%; table-layout: fixed; margin:10px 0; }
+      .editor th, .editor td { border:1px solid #e6e8ef; padding:6px 8px; text-align:left; vertical-align:top; word-break: break-word; overflow-wrap:anywhere; }
+      .editor pre{ white-space: pre-wrap; word-break: break-word; }
+      .editor code{ word-break: break-word; }
 
-      /* Центрируем форму по экрану */
-.login-wrap {
-  max-width: 360px;
-  margin: 10vh auto;
-  padding: 32px 28px;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.1);
-  text-align: center;
-  animation: fadeIn 0.4s ease-in-out;
-}
+      /* таблицы не рвём */
+      .editor table{ page-break-inside:auto; break-inside:auto; border-collapse:collapse; }
+      .editor tr{ page-break-inside:avoid; break-inside:avoid; }
+      .editor td, .editor th{ page-break-inside:avoid; break-inside:avoid; }
+      .editor thead{ display:table-header-group; }
+      .editor tfoot{ display:table-footer-group; }
 
-.login-wrap h2 {
-  margin-bottom: 20px;
-  font-size: 22px;
-  font-weight: 600;
-  color: #111826;
-}
+      /* фикс швов при html2canvas */
+      .page, .editor, .editor table{
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+        backface-visibility: hidden;
+      }
 
-/* Поля ввода */
-.login-wrap .input {
-  width: 100%;
-  padding: 12px 14px;
-  border: 1px solid #d4d8e3;
-  border-radius: 10px;
-  font-size: 14px;
-  margin-bottom: 14px;
-  transition: border 0.2s, box-shadow 0.2s;
-}
+      /* Логин */
+      .login-wrap{
+        max-width:360px; margin:10vh auto; padding:32px 28px; background:#fff;
+        border-radius:16px; box-shadow:0 6px 24px rgba(0,0,0,.1); text-align:center; animation:fadeIn .4s ease-in-out;
+      }
+      .login-wrap h2{ margin-bottom:20px; font-size:22px; font-weight:600; color:#111826; }
+      .login-wrap .input{ width:100%; padding:12px 14px; border:1px solid #d4d8e3; border-radius:10px; font-size:14px; margin-bottom:14px; transition:border .2s, box-shadow .2s; }
+      .login-wrap .input:focus{ border-color:#0a73ff; box-shadow:0 0 0 2px rgba(10,115,255,.2); outline:none; }
+      .login-wrap .btn{ width:100%; padding:12px; background:#0a73ff; color:#fff; font-size:15px; font-weight:600; border:none; border-radius:10px; cursor:pointer; transition:background .2s; }
+      .login-wrap .btn:hover{ background:#0659c7; }
+      .login-wrap .btn:active{ background:#044aad; }
+      .login-wrap .error{ margin-top:10px; color:#e54848; font-size:13px; }
+      @keyframes fadeIn{ from{opacity:0; transform: translateY(-10px);} to{opacity:1; transform: translateY(0);} }
 
-.login-wrap .input:focus {
-  border-color: #0a73ff;
-  box-shadow: 0 0 0 2px rgba(10,115,255,0.2);
-  outline: none;
-}
-
-/* Кнопка */
-.login-wrap .btn {
-  width: 100%;
-  padding: 12px;
-  background: #0a73ff;
-  color: #fff;
-  font-size: 15px;
-  font-weight: 600;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.login-wrap .btn:hover {
-  background: #0659c7;
-}
-
-.login-wrap .btn:active {
-  background: #044aad;
-}
-
-/* Ошибки */
-.login-wrap .error {
-  margin-top: 10px;
-  color: #e54848;
-  font-size: 13px;
-}
-
-/* Анимация */
-@keyframes fadeIn {
-  from {opacity: 0; transform: translateY(-10px);}
-  to {opacity: 1; transform: translateY(0);}
-}
+      @media print{
+        .page-break{ page-break-before: always; break-before: page; }
+        .topbar, .ribbon, .sidebar, .footer{ display:none !important; }
+        .wrap{ display:block; padding:0; }
+        .page{ margin:0 auto; border:0; box-shadow:none; page-break-after: always; }
+        .editor{ min-height:auto; padding:20mm; }
+      }
     </style>
   </head>
   <body>
     <!-- LOGIN -->
     <div id="login" class="login-wrap card">
       <h2 style="margin:0 0 10px">Вход в Genffice</h2>
-      <div class="field">
-        <input id="username" class="input" placeholder="username" />
-      </div>
-      <div class="field">
-        <input id="password" type="password" class="input" placeholder="password"/>
-      </div>
+      <div class="field"><input id="username" class="input" placeholder="username" /></div>
+      <div class="field"><input id="password" type="password" class="input" placeholder="password"/></div>
       <div class="row">
         <button class="btn" onclick="login()">Войти</button>
         <div id="loginError" class="error"></div>
@@ -230,11 +252,15 @@
           <button class="btn" onclick="saveDoc()">💾 Сохранить</button>
           <button class="btn" onclick="newDoc()">➕ Новый</button>
           <button class="btn" onclick="deleteDoc()">🗑 Удалить</button>
+          <button class="btn" onclick="copyDocLink()">🔗 Скопировать ссылку</button>
         </div>
 
         <div class="group">
           <button class="btn" onclick="exportPDF()">⬇️ PDF</button>
           <button class="btn" onclick="exportDOCX()">⬇️ DOCX</button>
+          <button class="btn" onclick="addPageBreak()">Разрыв страницы</button>
+          <button class="btn" id="togglePaged" onclick="togglePaged()">📄 Предпросмотр страниц</button>
+          <button class="btn" id="refreshPaged" onclick="renderPages()" style="display:none">↻ Обновить</button>
         </div>
 
         <div class="spacer"></div>
@@ -250,6 +276,8 @@
           <div class="page">
             <div id="editor" class="editor" contenteditable="true"></div>
           </div>
+
+          <div id="pagesPreview" class="pages" style="display:none"></div>
         </div>
 
         <!-- AI side -->
@@ -263,9 +291,7 @@
             <textarea id="prompt" class="text" placeholder="Например: «Сделай техническое задание без компаний и бюджетов, только требования и критерии приёмки»"></textarea>
             <div class="row">
               <button class="btn" onclick="runAI()">Ответ</button>
-              <!-- <button class="btn" onclick="runAIStream()">Стрим</button> -->
               <button class="btn" onclick="insertAIToDoc()">Вставить</button>
-              <!-- <button class="btn" onclick="runAIHtml()">Сгенерировать → вставить</button> -->
             </div>
             <div class="muted">Результат (Markdown):</div>
             <div id="aiOutput" class="out"></div>
@@ -279,28 +305,90 @@
           </div>
         </div>
       </div>
-
-      <!-- <div class="footer">Backend: http://127.0.0.1:8000/api</div> -->
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- PDF (html2pdf.js = html2canvas + jsPDF в одном бандле) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-YcsIPM4u8c7FkuQv2rCqgN0o0o8qG5LhJ6Hq6oGJ3neRr8mQ9u1H9J5v0J6etZlZyI1b1q3E7C2bJ3T1iG7QxA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-    <!-- DOCX -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" integrity="sha512-5hS5n8f3XzJq8N9aA9Y4y+eK6J8Y3bO3fCw5rX2S7xwS3n7xjYd8m1vNfO4WZ4R8qz+vQ7oZqUQd7C5iYd1Z4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-docx-js/0.3.1/html-docx.js" integrity="sha512-1m8G3NYy0Q6v8l0T1h7u7y4mJ+uQ3W6dVQh6r7c4f4p8pQ3o0q2q5uH3pQfQ2tH5Q3V6yq0r5d3lqv0r0Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- deps -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-docx-js/0.3.1/html-docx.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+    <script> mermaid.initialize({ startOnLoad: false, securityLevel: 'loose' }); </script>
 
     <script>
-      const BASE = `${window.location.origin}/api`;
+      // const BASE = `${window.location.origin}/api`;
+      const BASE = `https://genffice.pythonanywhere.com/api`;
       let token = null;
       let currentDoc = null;
 
-      // ====== Утилиты ======
       const $ = (id)=>document.getElementById(id);
 
       function pickContent(data){
         const obj = Array.isArray(data) ? data[0] : data;
         return obj?.choices?.[0]?.message?.content || obj?.text || "";
+      }
+
+      /* ----------- Chart.js блоки ----------- */
+      function renderCharts(root = document) {
+        const codeBlocks = root.querySelectorAll('pre > code');
+        codeBlocks.forEach(code => {
+          const lang = (code.className || '').toLowerCase();
+          const isChart = lang.includes('language-chart') || lang.trim() === 'chart';
+          if (!isChart) return;
+
+          let cfg;
+          try { cfg = JSON.parse(code.textContent.trim()); } catch { return; }
+
+          const pre = code.parentElement;
+          const wrap = document.createElement('div');
+          wrap.style.margin = '8px 0';
+          const canvas = document.createElement('canvas');
+          canvas.height = 320;
+          wrap.appendChild(canvas);
+          pre.replaceWith(wrap);
+
+          try {
+            new Chart(canvas.getContext('2d'), cfg);
+          } catch (e) {
+            const err = document.createElement('div');
+            err.textContent = 'Ошибка Chart.js: ' + e.message;
+            err.style.color = '#c00';
+            wrap.appendChild(err);
+          }
+        });
+      }
+
+      /* ----------- Mermaid блоки ----------- */
+      async function renderMermaid(root = document) {
+        const codeBlocks = root.querySelectorAll('pre > code');
+        let idx = 0;
+        for (const code of codeBlocks) {
+          const lang = (code.className || '').toLowerCase();
+          const isMermaid = lang.includes('language-mermaid') || lang.trim() === 'mermaid';
+          if (!isMermaid) continue;
+
+          const graph = code.textContent;
+          const pre = code.parentElement;
+          const id = 'mmd-' + (++idx);
+          try {
+            const { svg } = await mermaid.render(id, graph);
+            const div = document.createElement('div');
+            div.innerHTML = svg;
+            pre.replaceWith(div);
+          } catch (e) {
+            const err = document.createElement('div');
+            err.textContent = 'Ошибка Mermaid: ' + e.message;
+            err.style.color = '#c00';
+            pre.replaceWith(err);
+          }
+        }
+      }
+
+      function renderVisualBlocks(root = document) {
+        renderCharts(root);
+        renderMermaid(root);
       }
 
       function insertHTMLAtCursor(html){
@@ -328,89 +416,16 @@
         }
       }
 
-      // ===== Markdown → HTML (без библиотек) =====
-      
-      function mdToHtml(md){
-        md = escapeHtml(md || "").replace(/\r\n?/g, '\n');
-        // ```code``` блоки
-        let codeBlocks = [];
-        md = md.replace(/```([\s\S]*?)```/g, (_,code)=>{
-          const idx = codeBlocks.push(`<pre><code>${code}</code></pre>`) - 1;
-          return `\u0000CODE${idx}\u0000`;
-        });
-
-        const lines = md.split('\n');
-        let html = '';
-        let inUl=false, inOl=false, inTable=false;
-        let tableHeader=null;
-
-        const closeLists = ()=>{ if(inUl){html+='</ul>';inUl=false;} if(inOl){html+='</ol>';inOl=false;} };
-        const closeTable = ()=>{ if(inTable){html+='</tbody></table>';inTable=false;tableHeader=null;} };
-
-        for(let i=0;i<lines.length;i++){
-          let line = lines[i];
-
-          // --- hr ---
-          if(/^\s*---+\s*$/.test(line)){ closeLists(); closeTable(); html+='<hr/>'; continue; }
-
-          // --- table ---
-          if(line.trim().startsWith('|') && line.trim().endsWith('|')){
-            const next = lines[i+1] || '';
-            if(!inTable){
-              html += '<table><thead>';
-              tableHeader = line;
-              if(/^\s*\|?\s*:?-{3,}\s*(\|\s*:?-{3,}\s*)+\|?\s*$/.test(next)){
-                const ths = tableHeader.slice(1,-1).split('|').map(s=>s.trim());
-                html += '<tr>'+ths.map(h=>`<th>${mdInline(h)}</th>`).join('')+'</tr></thead><tbody>';
-                inTable=true; i++; continue;
-              }
-            }
-            if(inTable){
-              const tds = line.slice(1,-1).split('|').map(s=>s.trim());
-              html += '<tr>'+tds.map(td=>`<td>${mdInline(td).replace(/\n/g,'<br>')}</td>`).join('')+'</tr>';
-              continue;
-            }
-          } else { closeTable(); }
-
-          // --- headings ---
-          const m = line.match(/^(#{1,6})\s+(.*)$/);
-          if(m){
-            closeLists();
-            const lvl = m[1].length, text = mdInline(m[2]);
-            html += `<h${lvl}>${text}</h${lvl}>`;
-            continue;
-          }
-
-          // --- ordered list ---
-          if(/^\s*\d+[\.\)]\s+/.test(line)){
-            if(!inOl){ closeLists(); html+='<ol>'; inOl=true; }
-            html += `<li>${mdInline(line.replace(/^\s*\d+[\.\)]\s+/,''))}</li>`;
-            continue;
-          } else if(inOl && line.trim()===''){ closeLists(); continue; }
-
-          // --- unordered list ---
-          if(/^\s*[-*]\s+/.test(line)){
-            if(!inUl){ closeLists(); html+='<ul>'; inUl=true; }
-            html += `<li>${mdInline(line.replace(/^\s*[-*]\s+/,''))}</li>`;
-            continue;
-          } else if(inUl && line.trim()===''){ closeLists(); continue; }
-
-          // --- empty ---
-          if(line.trim()===''){ closeLists(); html+=''; continue; }
-
-          // --- paragraph ---
-          closeLists();
-          html += `<p>${mdInline(line)}</p>`;
-        }
-
-        closeLists(); closeTable();
-
-        // вернуть code-блоки
-        html = html.replace(/\u0000CODE(\d+)\u0000/g, (_,i)=>codeBlocks[Number(i)]);
-        return html;
+      function md(html){
+        const raw = marked.parse(html || "");
+        return (window.DOMPurify ? DOMPurify.sanitize(raw) : raw);
       }
 
-      // ====== Аутентификация ======
+      function addPageBreak(){
+        insertHTMLAtCursor('<div class="page-break"></div>');
+      }
+
+      /* ----------- Аутентификация ----------- */
       async function login(){
         const u = $("username").value.trim();
         const p = $("password").value;
@@ -423,45 +438,45 @@
           const d = await r.json();
           token = d.access;
 
-          $("login").style.display = "none";
-          $("app").style.display   = "block";
-          $("who") && ($("who").textContent = u);
+          document.getElementById("login").style.display = "none";
+          document.getElementById("app").style.display   = "block";
+          document.getElementById("who") && (document.getElementById("who").textContent = u);
 
           await loadDocs();
+          applyDocHash();
           const has = document.querySelectorAll("#docsList .item").length > 0;
           if(!has) await newDoc();
-        }catch(e){ $("loginError").textContent = e.message; }
+        }catch(e){ document.getElementById("loginError").textContent = e.message; }
       }
 
       function insertAIAsHTML() {
         const text = document.getElementById("aiOutput").textContent.trim();
         if (!text) return;
-
-        // превращаем markdown → html
-        const html = marked.parse(text);
-
-        // вставляем прямо в документ
+        const html = (typeof marked !== "undefined") ? marked.parse(text) : md(text);
         insertHTMLAtCursor(html);
+        renderVisualBlocks(document.getElementById('editor'));
       }
 
-      // ====== Документы ======
+      /* ----------- Документы ----------- */
       async function loadDocs(){
         const r = await fetch(BASE + "/documents/", { headers:{ Authorization:"Bearer "+token }});
         const docs = await r.json();
-        const list = $("docsList"); if(!list) return;
+        const list = document.getElementById("docsList"); if(!list) return;
         list.innerHTML = "";
         docs.forEach(doc=>{
-          const div = document.createElement("div");
-          div.className = "item";
-          div.textContent = doc.title;
-          div.onclick = ()=>openDoc(doc);
-          list.appendChild(div);
+          const a = document.createElement("a");
+          a.className = "item";
+          a.textContent = doc.title;
+          a.href = getDocURL(doc.id);
+          a.onclick = (e)=>{ e.preventDefault(); openDoc(doc); };
+          list.appendChild(a);
         });
       }
       function openDoc(doc){
         currentDoc = doc;
-        $("docName").value = doc.title || "Без названия";
-        $("editor").innerHTML = doc.content_html || "";
+        document.getElementById("docName").value = doc.title || "Без названия";
+        document.getElementById("editor").innerHTML = doc.content_html || "";
+        location.hash = `doc=${doc.id}`;
       }
       async function newDoc(){
         const r = await fetch(BASE + "/documents/", {
@@ -474,8 +489,8 @@
       }
       async function saveDoc(){
         if(!currentDoc) return;
-        const title = $("docName").value || "Без названия";
-        const html  = $("editor").innerHTML;
+        const title = document.getElementById("docName").value || "Без названия";
+        const html  = document.getElementById("editor").innerHTML;
         const r = await fetch(`${BASE}/documents/${currentDoc.id}/`, {
           method:"PATCH",
           headers:{ Authorization:"Bearer "+token, "Content-Type":"application/json" },
@@ -490,207 +505,279 @@
         await fetch(`${BASE}/documents/${currentDoc.id}/`, {
           method:"DELETE", headers:{ Authorization:"Bearer "+token }
         });
-        currentDoc=null; $("docName").value=""; $("editor").innerHTML=""; loadDocs();
+        currentDoc=null; document.getElementById("docName").value=""; document.getElementById("editor").innerHTML=""; loadDocs();
       }
 
-      // ====== Команды редактора ======
-      function cmd(name, btn){ document.execCommand(name,false,null); if(btn) btn.classList.toggle("active"); $("editor").focus(); }
+      /* ----------- Редактор: команды ----------- */
+      function cmd(name, btn){ document.execCommand(name,false,null); if(btn) btn.classList.toggle("active"); document.getElementById("editor").focus(); }
       function applyBlock(tag){
         const val = tag==="P"?"<p>": tag==="PRE"?"<pre>": `<${tag.toLowerCase()}>`;
-        document.execCommand("formatBlock", false, val); $("editor").focus();
+        document.execCommand("formatBlock", false, val); document.getElementById("editor").focus();
       }
-      function makeLink(){ const url=prompt("Вставьте URL:","https://"); if(!url)return; document.execCommand("createLink", false, url); $("editor").focus(); }
+      function makeLink(){ const url=prompt("Вставьте URL:","https://"); if(!url)return; document.execCommand("createLink", false, url); document.getElementById("editor").focus(); }
 
-      // ====== AI: обычный запрос (Markdown) ======
+      /* ----------- AI: обычный запрос ----------- */
       async function runAI() {
-    const prompt = document.getElementById("prompt").value.trim();
-    const content = document.getElementById("editor").innerHTML;
-    const out = document.getElementById("aiOutput");
-    const prev = document.getElementById("aiPreview");
+        const prompt = document.getElementById("prompt").value.trim();
+        const content = document.getElementById("editor").innerHTML;
+        const out  = document.getElementById("aiOutput");
+        const prev = document.getElementById("aiPreview");
+        out.textContent = "…"; if (prev) prev.innerHTML = "";
 
-    out.textContent = "…";
-    if (prev) prev.innerHTML = "";
-
-    const resp = await fetch(BASE + "/ai/", {
-      method: "POST",
-      headers: {
-        Authorization: "Bearer " + token,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ mode: "generate", prompt, html: content })
-    });
-
-    const data = await resp.json();
-    const text = pickContent(data);
-
-    // ✅ вот здесь превращаем markdown → html
-    const html = marked.parse(text || "");
-
-    // сразу вставляем в документ
-    insertHTMLAtCursor(html);
-
-    out.textContent = text || "⚠️ Нет ответа"; // как «сырой текст»
-    if (prev) prev.innerHTML = html;           // как красиво отрендеренный HTML
-    
-  }
-
-      // ====== AI: «сгенерировать → вставить» (одиночный запрос) ======
-      async function runAIHtml(){
-        const prompt = $("prompt").value.trim();
-        const content = $("editor").innerHTML;
-        const out = $("aiOutput");
-        const prev = $("aiPreview");
-        out.textContent = "…"; if(prev) prev.innerHTML = "";
-
-        try{
-          const resp = await fetch(BASE + "/ai/", {
-            method:"POST",
-            headers:{ Authorization:"Bearer "+token, "Content-Type":"application/json" },
-            body: JSON.stringify({ mode:"generate", prompt, html: content })
-          });
-          if(!resp.ok){ out.textContent = "Ошибка: " + resp.status + " " + (await resp.text()); return; }
-          const data = await resp.json();
-          const md = pickContent(data);
-          out.textContent = md || "⚠️ Нет ответа";
-          const html = mdToHtml(md || "");
-          if(prev) prev.innerHTML = html;
-          if(html) insertHTMLAtCursor(html);
-        }catch(err){
-          out.textContent = "⚠️ Ошибка: " + err.message;
-        }
-      }
-
-      // ====== AI: стрим (если используешь) ======
-      async function runAIStream(){
-        const prompt = $("prompt").value.trim();
-        const content = $("editor").innerHTML;
-        const out = $("aiOutput");
-        const think = $("aiReason");
-        const prev = $("aiPreview");
-
-        out.textContent = ""; if(think) think.textContent = ""; if(prev) prev.innerHTML = "";
-
-        const resp = await fetch(BASE + "/ai/stream/", {
-          method:"POST",
-          headers:{ Authorization:"Bearer "+token, "Content-Type":"application/json" },
-          body: JSON.stringify({ mode:"generate", prompt, html: content })
+        const resp = await fetch(BASE + "/ai/", {
+          method: "POST",
+          headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+          body: JSON.stringify({ mode: "generate", prompt, html: content })
         });
-        if(!resp.ok){ out.textContent = "Ошибка: " + resp.status + " " + (await resp.text()); return; }
 
-        const reader = resp.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = "";
+        const data = await resp.json();
+        const text = pickContent(data) || "";
+        out.textContent = text || "⚠️ Нет ответа";
 
-        while(true){
-          const { value, done } = await reader.read();
-          if(done) break;
-          buffer += decoder.decode(value, { stream:true });
-
-          let idx;
-          while((idx = buffer.indexOf("\n")) >= 0){
-            const raw = buffer.slice(0, idx); buffer = buffer.slice(idx+1);
-            const line = raw.trim(); if(!line || !line.startsWith("data:")) continue;
-            const data = line.slice(5).trim();
-            if(data === "[DONE]") return;
-
-            try{
-              const j = JSON.parse(data);
-              const ch = j?.choices?.[0] || {};
-              const d  = ch.delta || {};
-              if(typeof d.reasoning_content === "string" && d.reasoning_content && think) think.textContent += d.reasoning_content;
-              if(typeof d.content === "string" && d.content){
-                out.textContent += d.content;
-                if(prev) prev.innerHTML = mdToHtml(out.textContent);
-              }
-              const msg = ch?.message?.content;
-              if(typeof msg === "string" && msg){
-                out.textContent += msg;
-                if(prev) prev.innerHTML = mdToHtml(out.textContent);
-              }
-            }catch{
-              out.textContent += data;
-              if(prev) prev.innerHTML = mdToHtml(out.textContent);
-            }
-          }
-        }
+        const html = md(text);
+        if (prev) prev.innerHTML = html;
+        insertHTMLAtCursor(html);
+        renderVisualBlocks(document.getElementById('editor'));
       }
 
-      // ====== Вставки из AI ======
+      /* ----------- AI: вставка ----------- */
       function insertAIToDoc(){
-        const md = $("aiOutput").textContent.trim();
-        if(!md) return;
-        insertHTMLAtCursor( mdToHtml(md) );
+        const mdText = document.getElementById("aiOutput").textContent.trim();
+        if(!mdText) return;
+        const html = (typeof marked !== "undefined") ? marked.parse(mdText) : mdText;
+        insertHTMLAtCursor(html);
       }
       function clearAI(){
-        $("aiOutput").textContent = "";
-        $("aiPreview").innerHTML = "";
-        $("aiReason").textContent = "";
+        document.getElementById("aiOutput").textContent = "";
+        document.getElementById("aiPreview").innerHTML = "";
+        document.getElementById("aiReason").textContent = "";
       }
 
-      // Получаем имя файла из поля названия документа
-  function getDocName(ext) {
-    const name = (document.getElementById('docName')?.value || 'document')
-      .trim()
-      .replace(/[\\/:*?"<>|]+/g, '_')
-    return name || ('document.' + ext);
-  }
+      /* ----------- Имя файла ----------- */
+      function getDocName(ext){
+        const base = (document.getElementById('docName')?.value || 'document')
+          .trim().replace(/[\\/:*?"<>|]+/g,'_') || 'document';
+        return `${base}.${ext}`;
+      }
 
-  // ===== Экспорт в PDF (html2pdf.js) =====
-  async function exportPDF() {
-    const page = document.querySelector('.page'); // печатаем ровно «лист»
-    if (!page) return;
+      /* ----------- Экспорт PDF ----------- */
+      async function exportPDF() {
+        const page = document.querySelector('.page');
+        if (!page) return;
 
-    const filename = getDocName('pdf');
+        const filename = getDocName('pdf');
+        page.style.wordBreak = 'break-word';
+        page.style.overflowWrap = 'anywhere';
 
-    const opt = {
-      margin:       [10, 10, 10, 10],      // мм
-      filename,
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
+        const opt = {
+          margin: [0, 0, 0, 0],
+          filename,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', letterRendering: true, removeContainer: true },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['css', 'legacy'], avoid: ['table', 'thead', 'tr', 'td', '.no-split'] }
+        };
 
-    // Чтобы таблицы и длинные строки не ломали вёрстку
-    page.style.wordBreak = 'break-word';
-    page.style.overflowWrap = 'anywhere';
+        await html2pdf().set(opt).from(page).save();
+      }
 
-    await html2pdf().set(opt).from(page).save();
-  }
+      /* ----------- Экспорт DOCX ----------- */
+      function exportDOCX() {
+        const page = document.querySelector('.page');
+        if (!page) return;
 
-  // ===== Экспорт в DOCX (html-docx-js) =====
-  function exportDOCX() {
-    const page = document.querySelector('.page');
-    if (!page) return;
+        const filename = getDocName('docx');
+        let inner = page.innerHTML;
+        inner = inner.replace(/<div class="page-break[^>]*><\/div>/g, '<br style="page-break-before: always">');
 
-    const filename = getDocName('docx');
+        const docxCss = `
+          @page { size: A4; margin: 20mm; }
+          body { font-family: Arial, sans-serif; font-size: 12pt; color: #111; }
+          h1 { font-size: 24pt; margin: 0 0 10pt; }
+          h2 { font-size: 18pt; margin: 12pt 0 6pt; }
+          h3 { font-size: 14pt; margin: 10pt 0 6pt; }
+          p  { margin: 6pt 0; }
+          ul, ol { margin: 6pt 0 6pt 18pt; }
+          table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+          th, td { border: 1px solid #ddd; padding: 6pt; vertical-align: top; word-break: break-word; }
+          thead { display: table-header-group; }
+          tr, td, th { page-break-inside: avoid; }
+          code, pre { font-family: Consolas, 'Courier New', monospace; }
+        `;
 
-    // Минимальная типографика, которая поедет в Word
-    const docxCss = `
-      body { font-family: Arial, sans-serif; font-size: 12pt; color: #111; }
-      h1 { font-size: 24pt; margin: 0 0 10pt; }
-      h2 { font-size: 18pt; margin: 12pt 0 6pt; }
-      h3 { font-size: 14pt; margin: 10pt 0 6pt; }
-      p  { margin: 6pt 0; }
-      ul, ol { margin: 6pt 0 6pt 18pt; }
-      table { border-collapse: collapse; width: 100%; }
-      th, td { border: 1px solid #ddd; padding: 6pt; vertical-align: top; }
-      code, pre { font-family: Consolas, 'Courier New', monospace; }
-    `;
+        const html = '<!DOCTYPE html><html><head><meta charset="utf-8"><style>' + docxCss + '</style></head><body>' + inner + '</body></html>';
+        const blob = window.htmlDocx.asBlob(html, {
+          orientation: 'portrait',
+          margins: { top: 1134, right: 1134, bottom: 1134, left: 1134 }
+        });
+        saveAs(blob, filename);
+      }
 
-    const html =
-      '<!DOCTYPE html><html><head><meta charset="utf-8"><style>' +
-      docxCss +
-      '</style></head><body>' +
-      page.innerHTML +
-      '</body></html>';
+      /* ----------- Параметры страниц и превью ----------- */
+      const PAGE_W_MM = 210;
+      const PAGE_H_MM = 297;
+      const MARGIN_MM = 20;
+      const MM_TO_PX = 96/25.4;
+      const CONTENT_H_PX = (PAGE_H_MM - MARGIN_MM*2) * MM_TO_PX;
 
-    // поля: 720 twips = 0.5" = ~12.7 мм
-    const blob = window.htmlDocx.asBlob(html, {
-      orientation: 'portrait',
-      margins: { top: 720, right: 720, bottom: 720, left: 720 }
-    });
-    saveAs(blob, filename);
-  }
+      let pagedMode = false;
+      let debounceTimer = null;
+
+      function togglePaged(){
+        pagedMode = !pagedMode;
+        document.getElementById('togglePaged').classList.toggle('active', pagedMode);
+        document.getElementById('refreshPaged').style.display = pagedMode ? '' : 'none';
+        document.getElementById('pagesPreview').style.display = pagedMode ? '' : 'none';
+
+        document.querySelector('.page').style.display = pagedMode ? 'none' : '';
+        if (pagedMode) renderPages();
+      }
+
+      function renderPages(){
+        const src = document.getElementById('editor');
+        const out = document.getElementById('pagesPreview');
+        if (!src || !out) return;
+
+        out.innerHTML = '';
+
+        const meas = document.createElement('div');
+        meas.style.cssText = `
+          position:absolute; left:-99999px; top:-99999px; width:${(PAGE_W_MM)*MM_TO_PX}px;
+          visibility:hidden; pointer-events:none;
+        `;
+        document.body.appendChild(meas);
+
+        const newPage = () => {
+          const p = document.createElement('div');
+          p.className = 'page';
+          const body = document.createElement('div');
+          body.className = 'page-body';
+          p.appendChild(body);
+          out.appendChild(p);
+          return body;
+        };
+
+        let pageBody = newPage();
+        const fits = (container) => container.getBoundingClientRect().height <= CONTENT_H_PX + 0.5;
+        const nodes = Array.from(src.childNodes).map(n => n.cloneNode(true));
+
+        for (let i = 0; i < nodes.length; i++){
+          const node = nodes[i];
+          if (node.nodeType === 3 && !node.textContent.trim()) continue;
+
+          if (node.nodeType === 1 && node.tagName === 'TABLE') {
+            const origTable = node;
+            const thead = origTable.querySelector('thead')?.cloneNode(true) || null;
+            const rows = Array.from(origTable.querySelectorAll('tbody tr, > tr'));
+
+            const makeTable = () => {
+              const tbl = document.createElement('table');
+              tbl.style.width = '100%';
+              tbl.style.borderCollapse = 'collapse';
+              if (thead) {
+                const tHead = document.createElement('thead');
+                tHead.appendChild(thead.cloneNode(true));
+                tbl.appendChild(tHead);
+              }
+              const tBody = document.createElement('tbody');
+              tbl.appendChild(tBody);
+              pageBody.appendChild(tbl);
+              return tBody;
+            };
+
+            let tBody = makeTable();
+
+            for (const row of rows) {
+              tBody.appendChild(row.cloneNode(true));
+              meas.innerHTML = '';
+              const test = pageBody.cloneNode(true);
+              meas.appendChild(test);
+
+              if (!fits(test)) {
+                tBody.removeChild(tBody.lastChild);
+                pageBody = newPage();
+                tBody = makeTable();
+                tBody.appendChild(row.cloneNode(true));
+              }
+            }
+            continue;
+          }
+
+          // ---- обычные блоки + логика "заголовок держать с первым блоком" ----
+          const cloned = node.cloneNode(true);
+          const isHeading = cloned.nodeType === 1 && /^(H1|H2|H3)$/.test(cloned.tagName);
+
+          // попробуем положить прямо сейчас
+          pageBody.appendChild(cloned);
+
+          // базовая проверка
+          meas.innerHTML = '';
+          let test = pageBody.cloneNode(true);
+          meas.appendChild(test);
+
+          if (isHeading) {
+            // возьмём следующий значимый блок (если есть) и проверим "вместе"
+            const next = nodes.slice(i+1).find(n => !(n.nodeType === 3 && !n.textContent.trim()));
+            if (next) {
+              const test2 = pageBody.cloneNode(true);
+              test2.appendChild(next.cloneNode(true));
+              meas.innerHTML = '';
+              meas.appendChild(test2);
+              if (!fits(test2)) {
+                // переносим заголовок на новую страницу (вместе со следующим блоком добавим в следующей итерации)
+                pageBody.removeChild(pageBody.lastChild);
+                pageBody = newPage();
+                pageBody.appendChild(cloned.cloneNode(true));
+              }
+            } else if (!fits(test)) {
+              // заголовок сам не влез — переносим
+              pageBody.removeChild(pageBody.lastChild);
+              pageBody = newPage();
+              pageBody.appendChild(cloned.cloneNode(true));
+            }
+          } else if (!fits(test)) {
+            // обычный блок не влез — переносим
+            pageBody.removeChild(pageBody.lastChild);
+            pageBody = newPage();
+            pageBody.appendChild(cloned.cloneNode(true));
+          }
+        }
+
+        renderVisualBlocks(document.getElementById('pagesPreview'));
+        meas.remove();
+      }
+
+      document.addEventListener('input', (e)=>{
+        if (!pagedMode) return;
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(renderPages, 300);
+      });
+
+      // deep link
+      function getDocURL(id) {
+        const url = new URL(window.location.href);
+        url.hash = `doc=${id}`;
+        return url.toString();
+      }
+      async function openDocById(id) {
+        try {
+          const r = await fetch(`${BASE}/documents/${id}/`, { headers: { Authorization: "Bearer " + token } });
+          if (!r.ok) return;
+          const doc = await r.json();
+          openDoc(doc);
+        } catch {}
+      }
+      function applyDocHash() {
+        const m = location.hash.match(/doc=([\w-]+)/);
+        if (m && token) openDocById(m[1]);
+      }
+      function copyDocLink() {
+        if (!currentDoc?.id) return alert("Документ ещё не выбран/создан");
+        const link = getDocURL(currentDoc.id);
+        navigator.clipboard.writeText(link)
+          .then(()=> alert("Ссылка скопирована:\n" + link))
+          .catch(()=> prompt("Скопируйте ссылку вручную:", link));
+      }
     </script>
   </body>
 </html>

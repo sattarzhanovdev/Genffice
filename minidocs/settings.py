@@ -28,8 +28,8 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
-ALLOWED_HOSTS = ['genffice.pythonanywhere.com']
-CSRF_TRUSTED_ORIGINS = ['https://genffice.pythonanywhere.com']
+ALLOWED_ALL_HOSTS = True
+CSRF_ALL_TRUSTED_ORIGINS = True
 
 # DRF только с JWT, без SessionAuthentication → CSRF не нужен
 REST_FRAMEWORK = {
