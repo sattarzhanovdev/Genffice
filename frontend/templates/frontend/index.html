@@ -1,132 +1,27 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Genffice</title>
-    <style>
-      @media print {
-        body { background:#fff; }
-        .topbar,.ribbon,.sidebar,.footer { display:none !important; }
-        .wrap{ display:block; padding:0; }
-        .page{ width:210mm; margin:0 auto; border:0; box-shadow:none; }
-        .editor{ min-height:auto; padding:20mm; }
-      }
-
-      :root{
-        --blue:#0a73ff; --blue-dark:#0659c7; --bg:#f6f7fb; --panel:#fff;
-        --border:#e6e8ef; --text:#111826; --muted:#657089; --icon:#3b465c;
-        --shadow:0 6px 24px rgba(16,24,40,.08);
-      }
-      *{ box-sizing:border-box; }
-      body{ margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; background:var(--bg); color:var(--text); }
-
-      .topbar{ height:54px; background:var(--blue); color:#fff; display:flex; align-items:center; gap:12px; padding:0 16px; box-shadow:var(--shadow); }
-      .brand{ font-weight:700; letter-spacing:.2px; }
-      .docname{ margin-left:auto; background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25); color:#fff; border-radius:8px; padding:6px 10px; min-width:180px; }
-      .user{ display:flex; align-items:center; gap:8px; }
-      .user .dot{ width:10px; height:10px; border-radius:50%; background:#7df18a; }
-
-      .ribbon{ background:#fff; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; padding:8px 12px; position:sticky; top:0; z-index:20; }
-      .group{ display:flex; align-items:center; gap:6px; padding:6px 10px; border-right:1px solid var(--border); }
-      .btn{ display:inline-flex; align-items:center; justify-content:center; gap:6px; height:34px; padding:0 10px; border:1px solid var(--border); border-radius:8px; background:#fff; color:var(--icon); cursor:pointer; user-select:none; transition:.12s; box-shadow:0 1px 0 rgba(0,0,0,.02); }
-      .btn:hover{ background:#f4f6fb; }
-      .btn:active{ transform:translateY(1px); }
-      .btn.tog.active{ background:#ecf3ff; border-color:#cfe2ff; color:#0a53c1; }
-      .select{ height:34px; border:1px solid var(--border); border-radius:8px; padding:0 10px; background:#fff; }
-      .spacer{ flex:1; }
-
-      .wrap{ display:grid; grid-template-columns:auto 360px; gap:16px; padding:16px; max-width:1400px; margin:0 auto; }
-      .card{ background:var(--panel); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); }
-      .editor-scroll{ overflow:auto; }
-
-      .page{ width:210mm; margin:24px auto; background:#fff; border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow); box-sizing:border-box; }
-      .editor{ min-height:297mm; padding:20mm; outline:none; line-height:1.6; color:var(--text); word-break:break-word; overflow-wrap:anywhere; white-space:normal; }
-
-      .page-break{ display:block; height:0; margin:14px 0; border:0; position:relative; }
-      .page-break::before{ content:"— Разрыв страницы —"; display:block; text-align:center; color:#9aa3b2; border-top:1px dashed #d7dbe6; margin:8px 0; }
-
-      /* live-пагинация */
-      .pages{ display:grid; gap:16px; padding:16px; place-items:center; }
-      .pages .page{ position:relative; width:210mm; height:297mm; background:#fff; border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow); overflow:hidden; }
-      .pages .page::after{ /* визуальный «низ страницы» */
-        content:""; position:absolute; left:0; right:0; bottom:0;
-        border-bottom:6px solid #e5e7eb;
-      }
-      .pages .page-body{ box-sizing:border-box; padding:20mm; width:100%; height:100%; overflow:hidden; }
-      .pages .page-body{ line-height:1.6; color:var(--text); word-break:break-word; overflow-wrap:anywhere; white-space:normal; }
-      .pages .page-body table{ border-collapse:collapse; width:100%; table-layout:fixed; }
-      .pages .page-body th,.pages .page-body td{ border:1px solid #e6e8ef; padding:6px 8px; vertical-align:top; word-break:break-word; }
-
-      @media print{
-        #editor{ display:none !important; }
-        #pagesPreview{ display:block !important; }
-        .pages .page{ page-break-after:always; break-after:page; box-shadow:none; border:0; }
-      }
-
-      .editor:focus{ box-shadow: inset 0 0 0 2px #e6f0ff; }
-
-      .sidebar{ display:flex; flex-direction:column; min-height:70vh; }
-      .side-head{ padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
-      .side-body{ padding:12px; display:flex; flex-direction:column; gap:10px; }
-
-      textarea,input,select{ font:inherit; }
-      .text{ width:100%; min-height:90px; border:1px solid var(--border); border-radius:10px; padding:10px; resize:vertical; }
-      .out{ display:none; white-space:pre-wrap; border:1px dashed #cfd6e6; border-radius:10px; padding:10px; background:#fbfcff; word-wrap:break-word; overflow-wrap:break-word; max-width:100%; box-sizing:border-box; }
-      .row{ display:flex; gap:8px; align-items:center; }
-      .pill{ font-size:12px; color:#fff; background:var(--blue); padding:2px 8px; border-radius:999px; }
-      .muted{ color:var(--muted); font-size:12px; display:none; }
-      .list{ padding:10px; border-top:1px solid var(--border); max-height:200px; overflow:auto; }
-      .list .item{ display:block; padding:8px 10px; border-radius:8px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-decoration:none; color:inherit; }
-      .list .item:hover{ background:#f6f7fb; text-decoration:none; }
-
-      .editor h1{ font-size:28px; line-height:1.25; margin:0 0 12px; }
-      .editor h2{ font-size:22px; line-height:1.3; margin:18px 0 8px; }
-      .editor h3{ font-size:18px; line-height:1.35; margin:14px 0 6px; }
-      .editor p{ font-size:15px; margin:8px 0; }
-      .editor ul,.editor ol{ padding-left:24px; margin:8px 0; }
-      .editor li{ margin:4px 0; }
-      .editor hr{ border:0; border-top:1px solid #e6e8ef; margin:16px 0; }
-      .editor a{ color:#0a73ff; text-decoration:underline; }
-      .editor table{ border-collapse:collapse; width:100%; table-layout:fixed; margin:10px 0; }
-      .editor th,.editor td{ border:1px solid #e6e8ef; padding:6px 8px; text-align:left; vertical-align:top; word-break:break-word; overflow-wrap:anywhere; }
-      .editor pre{ white-space:pre-wrap; word-break:break-word; }
-      .editor code{ word-break:break-word; }
-
-      .editor table{ page-break-inside:auto; break-inside:auto; border-collapse:collapse; }
-      .editor tr{ page-break-inside:avoid; break-inside:avoid; }
-      .editor td,.editor th{ page-break-inside:avoid; break-inside:avoid; }
-
-      .editor thead{ display:table-header-group; }
-      .editor tfoot{ display:table-footer-group; }
-
-      .page,.editor,.editor table{ -webkit-transform:translateZ(0); transform:translateZ(0); backface-visibility:hidden; }
-
-      .login-wrap{ max-width:360px; margin:10vh auto; padding:32px 28px; background:#fff; border-radius:16px; box-shadow:0 6px 24px rgba(0,0,0,.1); text-align:center; animation:fadeIn .4s ease-in-out; }
-      .login-wrap h2{ margin-bottom:20px; font-size:22px; font-weight:600; color:#111826; }
-      .login-wrap .input{ width:100%; padding:12px 14px; border:1px solid #d4d8e3; border-radius:10px; font-size:14px; margin-bottom:14px; transition:border .2s, box-shadow .2s; }
-      .login-wrap .input:focus{ border-color:#0a73ff; box-shadow:0 0 0 2px rgba(10,115,255,.2); outline:none; }
-      .login-wrap .btn{ width:100%; padding:12px; background:#0a73ff; color:#fff; font-size:15px; font-weight:600; border:none; border-radius:10px; cursor:pointer; transition:background .2s; }
-      .login-wrap .btn:hover{ background:#0659c7; }
-      .login-wrap .btn:active{ background:#044aad; }
-      .login-wrap .error{ margin-top:10px; color:#e54848; font-size:13px; }
-      @keyframes fadeIn{ from{opacity:0; transform:translateY(-10px);} to{opacity:1; transform:translateY(0);} }
-
-      @media print{
-        .page-break{ page-break-before:always; break-before:page; }
-        .topbar,.ribbon,.sidebar,.footer{ display:none !important; }
-        .wrap{ display:block; padding:0; }
-        .page{ margin:0 auto; border:0; box-shadow:none; page-break-after:always; }
-        .editor{ min-height:auto; padding:20mm; }
-      }
-    </style>
+    <link rel="stylesheet" href="{% static 'frontend/style.css' %}">
   </head>
   <body>
     <!-- LOGIN -->
     <div id="login" class="login-wrap card">
-      <h2 style="margin:0 0 10px">Вход в Genffice</h2>
-      <div class="field"><input id="username" class="input" placeholder="username" /></div>
-      <div class="field"><input id="password" type="password" class="input" placeholder="password"/></div>
+      <h2 style="margin: 0 0 10px">Вход в Genffice</h2>
+      <div class="field">
+        <input id="username" class="input" placeholder="username" />
+      </div>
+      <div class="field">
+        <input
+          id="password"
+          type="password"
+          class="input"
+          placeholder="password"
+        />
+      </div>
       <div class="row">
         <button class="btn" onclick="login()">Войти</button>
         <div id="loginError" class="error"></div>
@@ -134,29 +29,44 @@
     </div>
 
     <!-- APP -->
-    <div id="app" style="display:none">
+    <div id="app" style="display: none">
       <div class="topbar">
         <div class="brand">Genffice</div>
         <div class="spacer"></div>
         <input id="docName" class="docname" placeholder="Без названия" />
-        <div class="user"><span class="dot"></span><span id="who" class="muted"></span></div>
+        <div class="user">
+          <span class="dot"></span><span id="who" class="muted"></span>
+        </div>
+        <button class="btn" onclick="logout()">Выйти</button>
       </div>
 
       <div class="ribbon">
         <div class="group">
           <select id="block" class="select" onchange="applyBlock(this.value)">
-            <option value="P">Абзац</option><option value="H1">Заголовок 1</option>
-            <option value="H2">Заголовок 2</option><option value="H3">Заголовок 3</option>
+            <option value="P">Абзац</option>
+            <option value="H1">Заголовок 1</option>
+            <option value="H2">Заголовок 2</option>
+            <option value="H3">Заголовок 3</option>
             <option value="PRE">Код</option>
           </select>
-          <button class="btn tog" id="bBold" onclick="cmd('bold',this)">B</button>
-          <button class="btn tog" id="bIt" onclick="cmd('italic',this)"><i>I</i></button>
-          <button class="btn tog" id="bUn" onclick="cmd('underline',this)"><u>U</u></button>
+          <button class="btn tog" id="bBold" onclick="cmd('bold',this)">
+            B
+          </button>
+          <button class="btn tog" id="bIt" onclick="cmd('italic',this)">
+            <i>I</i>
+          </button>
+          <button class="btn tog" id="bUn" onclick="cmd('underline',this)">
+            <u>U</u>
+          </button>
         </div>
 
         <div class="group">
-          <button class="btn" onclick="cmd('insertUnorderedList')">• Список</button>
-          <button class="btn" onclick="cmd('insertOrderedList')">1. Список</button>
+          <button class="btn" onclick="cmd('insertUnorderedList')">
+            • Список
+          </button>
+          <button class="btn" onclick="cmd('insertOrderedList')">
+            1. Список
+          </button>
           <button class="btn" onclick="makeLink()">Ссылка</button>
         </div>
 
@@ -164,34 +74,54 @@
           <button class="btn" onclick="saveDoc()">💾 Сохранить</button>
           <button class="btn" onclick="newDoc()">➕ Новый</button>
           <button class="btn" onclick="deleteDoc()">🗑 Удалить</button>
-          <button class="btn" onclick="copyDocLink()">🔗 Скопировать ссылку</button>
+          <button class="btn" onclick="copyDocLink()">
+            🔗 Скопировать ссылку
+          </button>
         </div>
 
         <div class="group">
           <button class="btn" onclick="exportPDF()">⬇️ PDF</button>
           <button class="btn" onclick="exportDOCX()">⬇️ DOCX</button>
           <button class="btn" onclick="addPageBreak()">Разрыв страницы</button>
-          <button class="btn" id="togglePaged" onclick="togglePaged()">📄 Предпросмотр страниц</button>
-          <button class="btn" id="refreshPaged" onclick="renderPages()" style="display:none">↻ Обновить</button>
+          <button class="btn" id="togglePaged" onclick="togglePaged()">
+            📄 Предпросмотр страниц
+          </button>
+          <button
+            class="btn"
+            id="refreshPaged"
+            onclick="renderPages()"
+            style="display: none"
+          >
+            ↻ Обновить
+          </button>
         </div>
 
         <div class="spacer"></div>
-        <div class="group" style="border-right:none"><span class="muted">Документы</span></div>
+        <div class="group" style="border-right: none">
+          <span class="muted">Документы</span>
+        </div>
       </div>
 
       <div class="wrap">
         <div class="card editor-scroll">
-          <div class="page"><div id="editor" class="editor" contenteditable="true"></div></div>
-          <div id="pagesPreview" class="pages" style="display:none"></div>
+          <div class="page">
+            <div id="editor" class="editor" contenteditable="true"></div>
+          </div>
+          <div id="pagesPreview" class="pages" style="display: none"></div>
         </div>
 
         <div class="card sidebar">
           <div class="side-head">
-            <strong>GEN AI</strong><span class="pill">В будущее вместе с нами!</span>
-            <span class="muted" style="margin-left:auto">/api/ai</span>
+            <strong>GEN AI</strong
+            ><span class="pill">В будущее вместе с нами!</span>
+            <span class="muted" style="margin-left: auto">/api/ai</span>
           </div>
           <div class="side-body">
-            <textarea id="prompt" class="text" placeholder="Например: «Сделай техническое задание без компаний и бюджетов, только требования и критерии приёмки»"></textarea>
+            <textarea
+              id="prompt"
+              class="text"
+              placeholder="Например: «Сделай техническое задание без компаний и бюджетов, только требования и критерии приёмки»"
+            ></textarea>
             <div class="row">
               <button class="btn" onclick="runAI()">Ответ</button>
               <button class="btn" onclick="insertAIToDoc()">Вставить</button>
@@ -202,7 +132,9 @@
             <div id="aiPreview" class="out"></div>
             <div class="muted">Обоснование:</div>
             <div id="aiReason" class="out"></div>
-            <div class="row"><button class="btn" onclick="clearAI()">Очистить</button></div>
+            <div class="row">
+              <button class="btn" onclick="clearAI()">Очистить</button>
+            </div>
             <div class="muted">Мои документы</div>
             <div id="docsList" class="list"></div>
           </div>
@@ -211,250 +143,29 @@
     </div>
 
     <!-- deps -->
+    <script src="{% static 'frontend/app.js' %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-docx-js/0.3.1/html-docx.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/html-docx-js/0.3.1/html-docx.js"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-funnel@4"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
-    <script> mermaid.initialize({ startOnLoad:false, securityLevel:'loose' }); </script>
-
     <script>
-      const BASE = `https://genffice.pythonanywhere.com/api`;
-      let token=null, currentDoc=null;
-
-      const $ = (id)=>document.getElementById(id);
-      function pickContent(data){ const obj=Array.isArray(data)?data[0]:data; return obj?.choices?.[0]?.message?.content || obj?.text || ""; }
-
-      /* ---------- Charts ---------- */
-      function renderCharts(root=document){
-        const blocks = root.querySelectorAll('pre > code');
-        blocks.forEach(code=>{
-          const lang=(code.className||'').toLowerCase();
-          const isChart = lang.includes('language-chart') || lang.trim()==='chart';
-          if(!isChart) return;
-          let cfg; try{ cfg=JSON.parse(code.textContent.trim()); }catch{ return; }
-          const pre=code.parentElement, wrap=document.createElement('div'); wrap.style.margin='8px 0';
-          const canvas=document.createElement('canvas'); canvas.height=320; wrap.appendChild(canvas); pre.replaceWith(wrap);
-          try{ new Chart(canvas.getContext('2d'), cfg); }
-          catch(e){ const err=document.createElement('div'); err.textContent='Ошибка Chart.js: '+e.message; err.style.color='#c00'; wrap.appendChild(err); }
-        });
-      }
-
-      /* ---------- Mermaid (с авто-префиксом flowchart) ---------- */
-      async function renderMermaid(root=document){
-        const blocks = root.querySelectorAll('pre > code');
-        let idx=0;
-        for(const code of blocks){
-          const lang=(code.className||'').toLowerCase();
-          const isMermaid = lang.includes('language-mermaid') || lang.trim()==='mermaid';
-          if(!isMermaid) continue;
-
-          let graph = code.textContent.trim();
-
-          // если не указан тип диаграммы — считаем это flowchart
-          const hasType = /^(flowchart|graph|sequenceDiagram|classDiagram|stateDiagram|erDiagram|gantt|journey|pie)\b/.test(graph);
-          if(!hasType){
-            graph = 'flowchart TD\n' + graph;
-          }
-
-          const pre = code.parentElement;
-          const id = 'mmd-' + (++idx);
-          try{
-            const { svg } = await mermaid.render(id, graph);
-            const div = document.createElement('div'); div.innerHTML = svg;
-            pre.replaceWith(div);
-          }catch(e){
-            const err = document.createElement('div');
-            err.textContent = 'Ошибка Mermaid: ' + e.message;
-            err.style.color = '#c00';
-            pre.replaceWith(err);
-          }
-        }
-      }
-
-      function renderVisualBlocks(root=document){ renderCharts(root); renderMermaid(root); }
-
-      function insertHTMLAtCursor(html){
-        const ed = $("editor"); ed.focus();
-        const sel = window.getSelection();
-        if(sel && sel.rangeCount){
-          let range=sel.getRangeAt(0); range.deleteContents();
-          const el=document.createElement("div"); el.innerHTML=html;
-          const frag=document.createDocumentFragment(); let node,last;
-          while((node=el.firstChild)){ last=frag.appendChild(node); }
-          range.insertNode(frag);
-          if(last){ range=range.cloneRange(); range.setStartAfter(last); range.collapse(true); sel.removeAllRanges(); sel.addRange(range); }
-        }else{ ed.innerHTML += html; }
-      }
-      function md(html){ const raw = marked.parse(html || ""); return (window.DOMPurify ? DOMPurify.sanitize(raw) : raw); }
-      function addPageBreak(){ insertHTMLAtCursor('<div class="page-break"></div>'); }
-
-      /* ---------- Auth ---------- */
-      async function login(){
-        const u=$("username").value.trim(), p=$("password").value;
-        try{
-          const r=await fetch(BASE+"/auth/token/",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:u,password:p})});
-          if(!r.ok) throw new Error("Неверный логин/пароль");
-          const d=await r.json(); token=d.access;
-          $("login").style.display="none"; $("app").style.display="block"; $("who") && ($("who").textContent=u);
-          await loadDocs(); applyDocHash(); const has = document.querySelectorAll("#docsList .item").length>0; if(!has) await newDoc();
-        }catch(e){ $("loginError").textContent=e.message; }
-      }
-
-      function insertAIAsHTML(){
-        const text=$("aiOutput").textContent.trim(); if(!text) return;
-        const html=(typeof marked!=="undefined")?marked.parse(text):md(text);
-        insertHTMLAtCursor(html); renderVisualBlocks($("editor"));
-      }
-
-      /* ---------- Docs ---------- */
-      async function loadDocs(){
-        const r=await fetch(BASE+"/documents/",{headers:{Authorization:"Bearer "+token}});
-        const docs=await r.json(); const list=$("docsList"); if(!list) return;
-        list.innerHTML=""; docs.forEach(doc=>{
-          const a=document.createElement("a"); a.className="item"; a.textContent=doc.title; a.href=getDocURL(doc.id);
-          a.onclick=(e)=>{ e.preventDefault(); openDoc(doc); };
-          list.appendChild(a);
-        });
-      }
-      function openDoc(doc){
-        currentDoc=doc; $("docName").value=doc.title||"Без названия"; $("editor").innerHTML=doc.content_html||""; location.hash=`doc=${doc.id}`;
-        renderVisualBlocks($("editor"));
-      }
-      async function newDoc(){
-        const r=await fetch(BASE+"/documents/",{method:"POST",headers:{Authorization:"Bearer "+token,"Content-Type":"application/json"},body:JSON.stringify({title:"Без названия",content_html:""})});
-        const doc=await r.json(); openDoc(doc); loadDocs();
-      }
-      async function saveDoc(){
-        if(!currentDoc) return;
-        const title=$("docName").value||"Без названия"; const html=$("editor").innerHTML;
-        const r=await fetch(`${BASE}/documents/${currentDoc.id}/`,{method:"PATCH",headers:{Authorization:"Bearer "+token,"Content-Type":"application/json"},body:JSON.stringify({title,content_html:html})});
-        const doc=await r.json(); openDoc(doc); loadDocs();
-      }
-      async function deleteDoc(){
-        if(!currentDoc) return; if(!confirm("Удалить документ?")) return;
-        await fetch(`${BASE}/documents/${currentDoc.id}/`,{method:"DELETE",headers:{Authorization:"Bearer "+token}});
-        currentDoc=null; $("docName").value=""; $("editor").innerHTML=""; loadDocs();
-      }
-
-      function cmd(name,btn){ document.execCommand(name,false,null); if(btn) btn.classList.toggle("active"); $("editor").focus(); }
-      function applyBlock(tag){ const val=tag==="P"?"<p>": tag==="PRE"?"<pre>": `<${tag.toLowerCase()}>`; document.execCommand("formatBlock",false,val); $("editor").focus(); }
-      function makeLink(){ const url=prompt("Вставьте URL:","https://"); if(!url) return; document.execCommand("createLink",false,url); $("editor").focus(); }
-
-      /* ---------- AI (simple) ---------- */
-      async function runAI(){
-        const prompt=$("prompt").value.trim(); const content=$("editor").innerHTML;
-        const out=$("aiOutput"), prev=$("aiPreview"); out.textContent="…"; if(prev) prev.innerHTML="";
-        const resp=await fetch(BASE+"/ai/",{method:"POST",headers:{Authorization:"Bearer "+token,"Content-Type":"application/json"},body:JSON.stringify({mode:"generate",prompt,html:content})});
-        const data=await resp.json(); const text=pickContent(data)||""; out.textContent=text||"⚠️ Нет ответа";
-        const html=md(text); if(prev) prev.innerHTML=html; insertHTMLAtCursor(html); renderVisualBlocks($("editor"));
-      }
-
-      function clearAI(){ $("aiOutput").textContent=""; $("aiPreview").innerHTML=""; $("aiReason").textContent=""; }
-
-      /* ---------- Export ---------- */
-      function getDocName(ext){ const base=($("docName")?.value||"document").trim().replace(/[\\/:*?"<>|]+/g,'_')||'document'; return `${base}.${ext}`; }
-
-      async function exportPDF(){
-        window.scrollTo(0,0);
-        const page=document.querySelector('.page'); if(!page) return;
-        const filename=getDocName('pdf'); page.style.wordBreak='break-word'; page.style.overflowWrap='anywhere';
-        const opt={ margin:[0,0,0,0], filename, image:{type:'jpeg',quality:0.98},
-          html2canvas:{ scale:2, useCORS:true, backgroundColor:'#ffffff', letterRendering:true, removeContainer:true },
-          jsPDF:{ unit:'mm', format:'a4', orientation:'portrait' },
-          pagebreak:{ mode:['css','legacy'], avoid:['table','thead','tr','td','.no-split'] } };
-        await html2pdf().set(opt).from(page).save();
-      }
-
-      function exportDOCX(){
-        const page=document.querySelector('.page'); if(!page) return;
-        const filename=getDocName('docx'); let inner=page.innerHTML;
-        inner=inner.replace(/<div class="page-break[^>]*><\/div>/g,'<br style="page-break-before: always">');
-        const docxCss=`@page { size: A4; margin: 20mm; }
-          body { font-family: Arial, sans-serif; font-size: 12pt; color: #111; }
-          h1{font-size:24pt;margin:0 0 10pt;} h2{font-size:18pt;margin:12pt 0 6pt;} h3{font-size:14pt;margin:10pt 0 6pt;}
-          p{margin:6pt 0;} ul,ol{margin:6pt 0 6pt 18pt;}
-          table{border-collapse:collapse;width:100%;table-layout:fixed;}
-          th,td{border:1px solid #ddd;padding:6pt;vertical-align:top;word-break:break-word;}
-          thead{display:table-header-group;} tr,td,th{page-break-inside:avoid;} code,pre{font-family:Consolas,'Courier New',monospace;}`;
-        const html='<!DOCTYPE html><html><head><meta charset="utf-8"><style>'+docxCss+'</style></head><body>'+inner+'</body></html>';
-        const blob=window.htmlDocx.asBlob(html,{orientation:'portrait',margins:{top:1134,right:1134,bottom:1134,left:1134}});
-        saveAs(blob,filename);
-      }
-
-      /* ---------- Пагинация-превью ---------- */
-      const PAGE_W_MM=210, PAGE_H_MM=297, MARGIN_MM=20, MM_TO_PX=96/25.4;
-      const CONTENT_H_PX=(PAGE_H_MM - MARGIN_MM*2) * MM_TO_PX;
-      let pagedMode=false, debounceTimer=null;
-
-      function togglePaged(){
-        pagedMode=!pagedMode;
-        $("togglePaged").classList.toggle("active",pagedMode);
-        $("refreshPaged").style.display = pagedMode ? "" : "none";
-        $("pagesPreview").style.display = pagedMode ? "" : "none";
-        document.querySelector(".page").style.display = pagedMode ? "none" : "";
-        if(pagedMode) renderPages();
-      }
-
-      function renderPages(){
-        const src=$("editor"), out=$("pagesPreview"); if(!src||!out) return;
-        out.innerHTML="";
-        const meas=document.createElement('div');
-        meas.style.cssText=`position:absolute; left:-99999px; top:-99999px; width:${(PAGE_W_MM)*MM_TO_PX}px; visibility:hidden; pointer-events:none;`;
-        document.body.appendChild(meas);
-
-        const newPage=()=>{ const p=document.createElement('div'); p.className='page';
-          const body=document.createElement('div'); body.className='page-body';
-          p.appendChild(body); out.appendChild(p); return body; };
-
-        let pageBody=newPage();
-        const fits=(container)=> container.getBoundingClientRect().height <= CONTENT_H_PX + 0.5;
-        const nodes=Array.from(src.childNodes).map(n=>n.cloneNode(true));
-
-        for(let node of nodes){
-          if(node.nodeType===3 && !node.textContent.trim()) continue;
-
-          if(node.nodeType===1 && node.tagName==='TABLE'){
-            const origTable=node; const thead=origTable.querySelector('thead')?.cloneNode(true) || null;
-            const rows=Array.from(origTable.querySelectorAll('tbody tr, > tr'));
-            const makeTable=()=>{ const tbl=document.createElement('table'); tbl.style.width='100%'; tbl.style.borderCollapse='collapse';
-              if(thead){ const tHead=document.createElement('thead'); tHead.appendChild(thead.cloneNode(true)); tbl.appendChild(tHead); }
-              const tBody=document.createElement('tbody'); tbl.appendChild(tBody); pageBody.appendChild(tbl); return tBody; };
-            let tBody=makeTable();
-            for(const row of rows){
-              tBody.appendChild(row.cloneNode(true)); meas.innerHTML=''; const test=pageBody.cloneNode(true); meas.appendChild(test);
-              if(!fits(test)){ tBody.removeChild(tBody.lastChild); pageBody=newPage(); tBody=makeTable(); tBody.appendChild(row.cloneNode(true)); }
-            }
-            continue;
-          }
-
-          pageBody.appendChild(node.cloneNode(true));
-          meas.innerHTML=''; const test=pageBody.cloneNode(true); meas.appendChild(test);
-          if(!fits(test)){ pageBody.removeChild(pageBody.lastChild); pageBody=newPage(); pageBody.appendChild(node.cloneNode(true)); }
-        }
-        renderVisualBlocks($("pagesPreview"));
-        meas.remove();
-      }
-
-      document.addEventListener('input', ()=>{ if(!pagedMode) return; clearTimeout(debounceTimer); debounceTimer=setTimeout(renderPages,300); });
-
-      const _exportPDF_orig = exportPDF; const _exportDOCX_orig = exportDOCX;
-      window.exportPDF = async function(){ if(pagedMode){ const cont=$("pagesPreview"); const filename=getDocName('pdf');
-        const opt={ margin:[0,0,0,0], filename, image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},
-          jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}, pagebreak:{mode:['css','legacy']} };
-        await html2pdf().set(opt).from(cont).save(); } else { await _exportPDF_orig(); } };
-      window.exportDOCX = function(){ if(pagedMode){ const cont=$("pagesPreview"); const filename=getDocName('docx');
-        const parts=Array.from(cont.querySelectorAll('.page-body')).map(b=>b.innerHTML);
-        const html='<!DOCTYPE html><html><head><meta charset="utf-8"><style>@page{size:A4;margin:20mm;} body{font-family:Arial,sans-serif;font-size:12pt;color:#111;} table{border-collapse:collapse;width:100%;table-layout:fixed;} th,td{border:1px solid #ddd;padding:6pt;vertical-align:top;word-break:break-word;} thead{display:table-header-group;} tr,td,th{page-break-inside:avoid;}</style></head><body>'+parts.map((x,i)=>(i?'<br style="page-break-before: always">':'')+x).join('')+'</body></html>';
-        const blob=window.htmlDocx.asBlob(html,{orientation:'portrait',margins:{top:1134,right:1134,bottom:1134,left:1134}}); saveAs(blob,filename); } else { _exportDOCX_orig(); } };
-
-      /* ---------- Deep link ---------- */
-      function getDocURL(id){ const url=new URL(window.location.href); url.hash=`doc=${id}`; return url.toString(); }
-      async function openDocById(id){ try{ const r=await fetch(`${BASE}/documents/${id}/`,{ headers:{Authorization:"Bearer "+token} }); if(!r.ok) return; const doc=await r.json(); openDoc(doc); }catch{} }
-      function applyDocHash(){ const m=location.hash.match(/doc=([\w-]+)/); if(m && token){ openDocById(m[1]); } }
-      function copyDocLink(){ if(!currentDoc?.id){ return alert("Документ ещё не выбран/создан"); } const link=getDocURL(currentDoc.id);
-        navigator.clipboard.writeText(link).then(()=>alert("Ссылка скопирована:\n"+link)).catch(()=>prompt("Скопируйте ссылку вручную:",link)); }
+      mermaid.initialize({ startOnLoad: false, securityLevel: "loose" });
     </script>
   </body>
 </html>

@@ -10,15 +10,13 @@ DEBUG = True
 INSTALLED_APPS = [
     "django.contrib.admin", "django.contrib.auth", "django.contrib.contenttypes",
     "django.contrib.sessions", "django.contrib.messages", "django.contrib.staticfiles",
-    "rest_framework", "corsheaders", "docs",
-    "frontend",
+    "rest_framework", "corsheaders",
+    "docs", "frontend",
 ]
 
-
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
-    "django.middleware.common.CommonMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -27,30 +25,12 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-# CORS_ALLOW_ORIGINS = ["https://genffice.pythonanywhere.com"]
-# ALLOWED_HOSTS = ["https://genffice.pythonanywhere.com", "genffice.pythonanywhere.com"]
-# CSRF_TRUSTED_ORIGINS = ["https://genffice.pythonanywhere.com"]
-
-CORS_ALLOW_ALL_ORIGINS = True
-ALLOWED_HOSTS = ["*"]
-CSRF_TRUSTED_ORIGINS = ["https://localhost", "http://127.0.0.1"]
-
-
-# DRF только с JWT, без SessionAuthentication → CSRF не нужен
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
-}
-
-
 ROOT_URLCONF = "minidocs.urls"
+
 TEMPLATES = [{
     "BACKEND": "django.template.backends.django.DjangoTemplates",
-    "DIRS": [], "APP_DIRS": True,
+    "DIRS": [],  # используем шаблоны из приложений (APP_DIRS=True)
+    "APP_DIRS": True,
     "OPTIONS": {"context_processors": [
         "django.template.context_processors.debug",
         "django.template.context_processors.request",
@@ -58,9 +38,12 @@ TEMPLATES = [{
         "django.contrib.messages.context_processors.messages",
     ]},
 }]
+
 WSGI_APPLICATION = "minidocs.wsgi.application"
 
-DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}}
+DATABASES = {
+    "default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}
+}
 
 AUTH_PASSWORD_VALIDATORS = []
 
@@ -68,29 +51,41 @@ LANGUAGE_CODE = "ru-ru"
 TIME_ZONE = "Asia/Bishkek"
 USE_I18N = True
 USE_TZ = True
-STATIC_URL = "static/"
 
+# --- Static (dev) ---
+STATIC_URL = "/static/"
+
+# STATICFILES_DIRS = [
+#     BASE_DIR / "static",   # можешь удалить если нет такой папки
+# ]
+
+STATIC_ROOT = BASE_DIR / "staticfiles"  # сюда соберётся collectstatic
+# DRF + JWT
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",),
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
 }
 
-# CORS
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_HEADERS = ["content-type", "authorization"]
-CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
-
-# JWT
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=3),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
 }
 
-# .env: AI endpoint
+# CORS/CSRF (dev)
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_HEADERS = ["content-type", "authorization"]
+CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+
+ALLOWED_HOSTS = ["*"]
+CSRF_TRUSTED_ORIGINS = [
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
+]
+
+# AI endpoint
 AI_PROVIDER_URL = os.getenv(
     "AI_PROVIDER_URL",
     "https://isadani.app.n8n.cloud/webhook/3fef88a0-8eae-4c40-bf3e-9737f2f44684",
 )
-
-STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
